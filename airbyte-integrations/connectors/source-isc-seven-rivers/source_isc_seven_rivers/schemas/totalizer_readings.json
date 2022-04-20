@@ -5,7 +5,7 @@
             "dateTime": {"type": "number"},
             "pumpOnDate": {"type": "number"},
             "pumpOffDate": {"type": "number"},
-            "pumpLeftOn": {"type": "number"},
+            "pumpLeftOn": {"type": "string"},
             "srfPreKWH": {"type": "number"},
             "srfPostKWH": {"type": "number"},
             "wIscPreKWH": {"type": "number"},
