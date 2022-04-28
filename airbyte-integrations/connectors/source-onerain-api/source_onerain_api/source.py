@@ -506,10 +506,10 @@ def get_sensor_data(logger,state,config,stream_name,is_incremental):
     if has_data_start:
         data_start = config[stream_name]['data_start']
         if is_incremental:
-            # start date begins with last cursor value in incremental mode
+            # start date begins with last cursor value (plus one second) in incremental mode
             if stream_name in state: # may be in incremental mode but cursor not initialized yet
-                data_start = override_query_params['data_start'] = state[stream_name]
-                logger.debug(f"overriding config value 'data_start' for stream {stream_name} with current stream cursor value {state[stream_name]}")
+                data_start = override_query_params['data_start'] = add_time_seconds(state[stream_name],1)
+                logger.debug(f"overriding config value 'data_start' for stream {stream_name} with current stream cursor value {state[stream_name]} plus 1 second")
 
         data_end = onerain_datetime_now() # default to now 
         if has_data_end:
@@ -586,6 +586,16 @@ def add_time_days(yyyy_mm_dd_hh_mm_ss,num_days):
     # convert from datetime back to string in same format supplied
     return nt.strftime(OneRainDateTimeFormat)
 
+def add_time_seconds(yyyy_mm_dd_hh_mm_ss,num_seconds):
+    "add number of seconds to supplied date/time and return it as string in same format"
+
+    # convert to datetime object   
+    dt = onerain_datetime_to_datetime(yyyy_mm_dd_hh_mm_ss) 
+    # add num seconds
+    nt = dt + timedelta(seconds=num_seconds)
+    # convert from datetime back to string in same format supplied
+    return nt.strftime(OneRainDateTimeFormat)
+
 def diff_days(d1,d2):
     "subtract d1 - d2 and return number of days difference. both dates are strings in yyyy-mm-dd hh:mm:ss format"
 
@@ -605,5 +615,6 @@ def data_range(dt_start,dt_end,increment_days):
             if dt(dt_incremental_end) > dt(dt_end):
                 dt_incremental_end = dt_end
             yield dt_start,dt_incremental_end
-            dt_start = dt_incremental_end
+            # start is now last end range plus 1 second
+            dt_start = add_time_seconds(dt_incremental_end,1)
  
