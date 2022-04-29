@@ -79,16 +79,15 @@ class SourceOnerainApi(Source):
 
             def assertAliasedParamsNotBothPresent(config,stream,paramName1,paramName2):
                 if paramName1 in config[stream] and paramName2 in config[stream]:
-                        if len(config[stream][paramName1]) > 0 and len(config[stream][paramName2]):
+                        if isinstance(config[stream][paramName1],str) and len(config[stream][paramName1]) > 0 and len(config[stream][paramName2]):
                             # both params present and both asssigned a non-zero length value
                             raise AssertionError(f"{stream}: cannot specify both aliased parameters '{paramName1}' and '{paramName2}'. choose one.")
 
             def assertOneRainDateFormat(config,stream,paramName):
                 try:
                     if paramName in config[stream] :
-                        if len(config[stream][paramName]) > 0:
+                        if isinstance(config[stream][paramName],str) and len(config[stream][paramName]) > 0:
                             return datetime.strptime(config[stream][paramName],'%Y-%m-%d %H:%M:%S')
-                        del config[stream][paramName]
 
                 except ValueError as e:
                     raise ValueError(stream,paramName,str(e))
