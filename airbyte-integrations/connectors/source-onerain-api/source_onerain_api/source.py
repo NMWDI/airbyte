@@ -140,16 +140,16 @@ class SourceOnerainApi(Source):
 
         # GET SPEC TO GRAB DESCRIPTIONS OF FIELDS
         spec = self.spec(logger).connectionSpecification
-        defs = spec['definitions']
+#        defs = spec['definitions']
 
-        def get_spec_def_obj(name):
-            return defs[name]
-        def get_spec_def_desc(name):
-            return defs[name]['description']
-        def get_spec_def_type(name):
-            return defs[name]['type']
-        def get_spec_def_prop(spec_def_name,def_prop_name):
-            return defs[spec_def_name][def_prop_name]
+#        def get_spec_def_obj(name):
+#            return defs[name]
+#        def get_spec_def_desc(name):
+#            return defs[name]['description']
+#        def get_spec_def_type(name):
+#            return defs[name]['type']
+#        def get_spec_def_prop(spec_def_name,def_prop_name):
+#            return defs[spec_def_name][def_prop_name]
 
         # ADD SCHEMA FOR StreamGetSiteMetaData
         stream_name = StreamGetSiteMetaData 
@@ -157,8 +157,8 @@ class SourceOnerainApi(Source):
             "$schema": "http://json-schema.org/draft-07/schema#",
             "type": "object",
             "properties": {
-                "or_site_id": get_spec_def_obj('or_site_id'),
-                "site_id": get_spec_def_obj('site_id'),
+                "or_site_id": {"type":"integer", "description":"OneRain Contrail Site ID"},
+                "site_id": {"type":"string", "description": "descriptive alias to or_site_id"},
                 "location":{"desription":"describes site location","type":"string"},
                 "owner":{"desription":"DEPRECATED","type":"string"},
                 "system_id":{"description":"identifies the input system for which the site belongs.", "type":"integer"},
@@ -179,15 +179,15 @@ class SourceOnerainApi(Source):
             "$schema": "http://json-schema.org/draft-07/schema#",
             "type": "object",
             "properties": {
-                "site_id": get_spec_def_obj('site_id'),
-                "sensor_id": get_spec_def_obj('sensor_id'),
-                "or_site_id": get_spec_def_obj('or_site_id'),
-                "or_sensor_id":get_spec_def_obj('or_sensor_id'),
+                "site_id": {"type":"string", "description": "descriptive alias to or_site_id"},
+                "sensor_id": {"type":"string", "description": "descriptive alias to or_sensor_id"},
+                "or_site_id": {"type": "integer", "description":"OneRain Contrail Site ID"},
+                "or_sensor_id":{"type":"integer", "description":"OneRain Contrail Sensor ID"},
                 "location":{"description":"site name","type":"string"},
                 "description":{"description":"sensor name", "type":"string"},
-                "sensor_class":get_spec_def_obj('class'),
+                "sensor_class":{"type":"integer", "description": "numeric Sensor class as defined in Contrail"},
                 "sensor_type":{"description":"source type of data","type":"string"},
-                "units":get_spec_def_obj('units'),
+                "units": {"type":"string", "description":"unit type used in measurement"},
                 "translate":{"description":"text translation enabled", "type":"boolean"}, 
                 "precision":{"description":"number of decimals displayed for Reading/Finished value in user interface", "type":"integer"},
                 "last_time":{"description":"last data time; see GetSensorData A5","type":"string"},
@@ -233,27 +233,27 @@ class SourceOnerainApi(Source):
             "$schema": "http://json-schema.org/draft-07/schema#",
             "type": "object",
             "properties": {
-                "site_id":get_spec_def_obj('site_id'),
-                "sensor_id":get_spec_def_obj('sensor_id'),
-                "or_site_id":get_spec_def_obj('or_site_id'),
-                "or_sensor_id":get_spec_def_obj('or_sensor_id'),
-                "sensor_class":get_spec_def_obj('class'),
+                "site_id": {"type":"string", "description": "descriptive alias to or_site_id"},
+                "sensor_id": {"type":"string", "description": "descriptive alias to or_sensor_id"},
+                "or_site_id": {"type": "integer", "description":"OneRain Contrail Site ID"}, 
+                "or_sensor_id": {"type":"integer", "description":"OneRain Contrail Sensor ID"},
+                "sensor_class": {"type":"integer", "description": "numeric Sensor class as defined in Contrail"},
                 "data_time": {
-                    "type": get_spec_def_type('onerain_datetime'),
+                    "type": "string",
                     "description":"date/time data was captured",
-                    "pattern":get_spec_def_prop('onerain_datetime','pattern')
+                    "pattern": "^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2} [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}"
                 },
                 "data_value": {
                     "type":"number",
                     "description":"finished data value with precision (conversion) applied",
                  
                 },
-                "data_quality": get_spec_def_obj('data_quality'),
+                "data_quality": {"type":"string", "description": "code for quality of data"},
                 "raw_value": {
                     "type":"number",
                     "description":"this is the value supplied by the source system. It is the value before any conversion or validation is applied.",
                 },
-                "units": get_spec_def_obj('units')
+                "units": {"type":"string", "description": "unit type used in measurement"} 
     
                 
             }
