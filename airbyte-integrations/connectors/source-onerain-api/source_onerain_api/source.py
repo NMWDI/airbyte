@@ -79,12 +79,17 @@ class SourceOnerainApi(Source):
 
             def assertAliasedParamsNotBothPresent(config,stream,paramName1,paramName2):
                 if paramName1 in config[stream] and paramName2 in config[stream]:
-                    raise AssertionError(f"{stream}: cannot specify both aliased parameters '{paramName1}' and '{paramName2}'. choose one.")
+                        if len(config[stream][paramName1]) > 0 and len(config[stream][paramName2]):
+                            # both params present and both asssigned a non-zero length value
+                            raise AssertionError(f"{stream}: cannot specify both aliased parameters '{paramName1}' and '{paramName2}'. choose one.")
 
             def assertOneRainDateFormat(config,stream,paramName):
                 try:
-                    if paramName in config[stream]:
-                        return datetime.strptime(config[stream][paramName],'%Y-%m-%d %H:%M:%S')
+                    if paramName in config[stream] :
+                        if len(config[stream][paramName]) > 0:
+                            return datetime.strptime(config[stream][paramName],'%Y-%m-%d %H:%M:%S')
+                        del config[stream][paramName]
+
                 except ValueError as e:
                     raise ValueError(stream,paramName,str(e))
  
@@ -386,6 +391,10 @@ def get_request_url(stream,config,override_query_params={}):
  
     if stream in config:
         for stream_prop in config[stream]:
+            stream_prop_value = config[stream][stream_prop]
+            if isinstance(stream_prop_value,str) and len(stream_prop_value) < 1:
+                continue
+            # property exists in stream config and value is non-zero length
             if stream_prop in override_query_params:
                 query_params[stream_prop] = override_query_params[stream_prop]
             else:
@@ -498,8 +507,8 @@ def get_sensor_data(logger,state,config,stream_name,is_incremental):
     override_query_params = {}
 
     # check if either data_start     
-    has_data_start = 'data_start' in config[stream_name]
-    has_data_end = 'data_end' in config[stream_name]
+    has_data_start = 'data_start' in config[stream_name] and len(config[stream_name]['data_start']) > 0
+    has_data_end = 'data_end' in config[stream_name] and len(config[stream_name]['data_end']) > 0
 
     logger.info(f"has_data_start: {has_data_start}")
 
@@ -545,15 +554,20 @@ def call_sensor_data_api(logger,state,config,stream_name,override_query_params,i
 
         for row in results:
             data=dict()
-            data['site_id'] = row['site_id']
-            data['sensor_id'] = row['sensor_id']
+            #logger.info(f'row = {row}')
+            if 'site_id' in row: # not present when or_site_id is used as a query filter
+                data['site_id'] = row['site_id'] 
+            if 'sensor_id' in row: # not present when or_site_id is used as a query filter
+                data['sensor_id'] = row['sensor_id']
             data['or_site_id'] = int(row['or_site_id'])
             data['or_sensor_id'] = int(row['or_sensor_id'])
-            data['sensor_class'] = int(row['sensor_class'])
+            if 'sensor_class' in row: # not present when or_site_id is used as a query filter
+                data['sensor_class'] = int(row['sensor_class'])
             data['data_time'] = row['data_time']
             data['data_value'] = float(row['data_value'])
             data['raw_value'] = float(row['raw_value'])
-            data['units'] = row['units']
+            if 'units' in row: # not present when or_site_id is used as a query filter
+                data['units'] = row['units']
             data['data_quality'] = row['data_quality']
 
             yield data 
