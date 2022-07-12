@@ -106,21 +106,11 @@ class Samples(NmbgmrMajorChemistryStream):
 
     def next_page_token(self, response: requests.Response) -> Optional[Mapping[str, Any]]:
         """
-        Parses the nextLink URL from the JSON response. The current nextLink contains an IP 
-        address and is broken. Though the end of the URL containing the objectid can be 
-        concatenate to the base URL to retrieve the correct page.
+        Parses the nextLink URL from the JSON response.
         """
 
         try:
-            r = response.json()["nextLink"]
-
-            url_split_list = r.split("?")
-
-            object_id = url_split_list[-1]
-
-            url_base = "https://maps.nmt.edu/maps/data/waterlevels/major_chemistry"
-
-            next_page = self.url_base + "?" + object_id 
+            next_page = response.json()["nextLink"]
 
             return next_page
 
