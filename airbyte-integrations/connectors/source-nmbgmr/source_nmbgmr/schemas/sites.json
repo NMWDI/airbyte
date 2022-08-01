@@ -88,11 +88,12 @@
                                       "ChemistryReportNote": {"type": "string"},
                                       "X_NAD83_Zone12": {"type": "number"},
                                       "Y_NAD83_Zone12": {"type": "number"},
-                                      "projectname": {"type": "string"},
+                                      "ProjectName": {"type": "string"},
                                       "USGSProjectID": {"type": "string"},
                                       "LatitudeDD": {"type": "string"},
                                       "LongitudeDD": {"type": "string"},
-                                      "PublicRelease": {"type": "boolean"}
+                                      "PublicRelease": {"type": "boolean"},
+                                      "MeasuringAgency": {"type":  "string"}
                                       }
   }
 
