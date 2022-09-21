@@ -91,7 +91,6 @@ class CkanStream(HttpStream, ABC):
         yield {}
 
 
-
 class CollectionSchema(CkanStream):
     """
     Gets the schema of the current collection - see: https://developers.webflow.com/#get-collection-with-full-schema, and
@@ -124,20 +123,12 @@ class CollectionSchema(CkanStream):
         stream_state: Mapping[str, Any],
         **kwargs) -> Iterable[Mapping]:
         """
-        Parses the response with the CSV from the given resource_id
+        Parses the Data Dictionary fields from the given resource_id
         """
 
         r = response.json()
 
-        self.fields = r['result']['fields']
-
-        #yield from r['result']['records']
-
         yield from r['result']['fields']
-
-
-
-
 
 
 class Csv(CkanStream):
@@ -183,10 +174,7 @@ class Csv(CkanStream):
             "text": "string"
         }
 
-
         for field in schema_records:
-            print ('=============')
-            print (field)
 
             property_name = field["id"]
             
@@ -197,29 +185,6 @@ class Csv(CkanStream):
             schema['properties'][property_name] = {"type": schema_type} 
 
         return schema
-
-       
-        '''
-        type_conversion_dict = {
-            "int": "integer",
-            "numeric": "number",
-            "text": "string"
-        }
-
-        for field in self.fields:
-
-            property_name = field["id"]
-            
-            field_type = field["type"]
-
-            schema_type = type_conversion_dict[field_type]
-                       
-            schema['properties'][property_name] = {"type": schema_type} 
-
-        return schema
-
-        '''
-
 
 
     def parse_response(self,
@@ -231,8 +196,6 @@ class Csv(CkanStream):
         """
 
         r = response.json()
-
-        self.fields = r['result']['fields']
 
         yield from r['result']['records']
 
