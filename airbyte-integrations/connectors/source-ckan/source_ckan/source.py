@@ -91,6 +91,55 @@ class CkanStream(HttpStream, ABC):
         yield {}
 
 
+
+class CollectionSchema(CkanStream):
+    """
+    Gets the schema of the current collection - see: https://developers.webflow.com/#get-collection-with-full-schema, and
+    then converts that schema to a json-schema.org-compatible schema that uses supported Airbyte types.
+    More info about Webflow schema: https://developers.webflow.com/#get-collection-with-full-schema
+    Airbyte data types: https://docs.airbyte.com/understanding-airbyte/supported-data-types/
+    """
+
+    # Required.
+    primary_key = "id"
+
+    def __init__(self, resource_id,  *args, **kw):
+        super(CollectionSchema, self).__init__(*args, **kw)
+
+        self.resource_id = resource_id
+
+
+    def path(
+        self, stream_state: Mapping[str, Any] = None, stream_slice: Mapping[str, Any] = None, next_page_token: Mapping[str, Any] = None
+    ) -> str:
+        """
+        Path to given resource_id
+        """
+
+        return f"action/datastore_search?resource_id={self.resource_id}"
+
+
+    def parse_response(self,
+        response: requests.Response,
+        stream_state: Mapping[str, Any],
+        **kwargs) -> Iterable[Mapping]:
+        """
+        Parses the response with the CSV from the given resource_id
+        """
+
+        r = response.json()
+
+        self.fields = r['result']['fields']
+
+        #yield from r['result']['records']
+
+        yield from r['result']['fields']
+
+
+
+
+
+
 class Csv(CkanStream):
     """
     Gets specified CSV from CKAN
@@ -122,6 +171,35 @@ class Csv(CkanStream):
 
         schema = super().get_json_schema()
 
+        resource_id = self.resource_id
+
+        schema_stream = CollectionSchema(resource_id=resource_id)
+
+        schema_records = schema_stream.read_records(sync_mode="full_refresh")
+
+        type_conversion_dict = {
+            "int": "integer",
+            "numeric": "number",
+            "text": "string"
+        }
+
+
+        for field in schema_records:
+            print ('=============')
+            print (field)
+
+            property_name = field["id"]
+            
+            field_type = field["type"]
+
+            schema_type = type_conversion_dict[field_type]
+                       
+            schema['properties'][property_name] = {"type": schema_type} 
+
+        return schema
+
+       
+        '''
         type_conversion_dict = {
             "int": "integer",
             "numeric": "number",
@@ -139,6 +217,9 @@ class Csv(CkanStream):
             schema['properties'][property_name] = {"type": schema_type} 
 
         return schema
+
+        '''
+
 
 
     def parse_response(self,
