@@ -4,10 +4,10 @@
   "properties": {
             "monitoring_point_id": {"type": "number"},
             "dateTime": {"type": "number"},
-            "nmiscVolumeKWH": {"type": "number"},
-            "srfVolumeKWH": {"type": "number"},
-            "otherVolumeKWH": {"type": "number"},
-            "rateKWH": {"type": "number"},
+            "nmiscVolume": {"type": "number"},
+            "srfVolume": {"type": "number"},
+            "otherVolume": {"type": "number"},
+            "rate": {"type": "number"},
             "comments": {"type": "string"}
   }
 }
