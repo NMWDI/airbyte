@@ -2,26 +2,12 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "properties": {
+            "monitoring_point_id": {"type": "number"},
             "dateTime": {"type": "number"},
-            "pumpOnDate": {"type": "number"},
-            "pumpOffDate": {"type": "number"},
-            "pumpLeftOn": {"type": "string"},
-            "srfPreKWH": {"type": "number"},
-            "srfPostKWH": {"type": "number"},
-            "wIscPreKWH": {"type": "number"},
-            "wIscPostKWH": {"type": "number"},
-            "otherPreKWH": {"type": "number"},
-            "nmiscVolumeKWH": {"type": "number"},
-            "srfVolumeKWH": {"type": "number"},
-            "otherVolumeKWH": {"type": "number"},
-            "pumpType": {"type": "string"},
-            "rateKWH": {"type": "number"},
-            "comments": {"type": "string"},
-            "eIscPreKWH": {"type": "number"},
-            "eIscPostKWH": {"type": "number"},
-            "eIscMultKWH": {"type": "number"},
-            "eSriPreKWH": {"type": "number"},
-            "eSriPostKWH": {"type": "number"},
-            "eSriMultKWH": {"type": "number"}
+            "nmiscVolume": {"type": "number"},
+            "srfVolume": {"type": "number"},
+            "otherVolume": {"type": "number"},
+            "rate": {"type": "number"},
+            "comments": {"type": "string"}
   }
 }
