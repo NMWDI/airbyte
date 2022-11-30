@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "SamplePointID": {
+      "type": "string"
+    },
+    "Analyte": {
+      "type":  "string"
+    },
+    "Symbol": {
+      "type": "string"
+    },
+    "SampleValue": {
+      "type": "number"
+    },
+    "Units": {
+      "type": "string"
+    },
+    "Uncertainty": {
+      "type": "string"
+    },
+    "AnalysisMethod": {
+      "type": "string"
+    },
+    "AnalysisDate": {
+      "type": "string"
+    },
+    "Notes": {
+      "type": "string"
+    },
+    "Volume": {
+      "type": "number"
+    },
+    "VolumeUnit": {
+      "type": "string"
+    },
+    "OBJECTID": {
+      "type": "integer"
+    },
+    "AnalysesAgency": {
+      "type": "string"
+    },
+    "WCLab_ID": {
+      "type": "string"
+    },
+    "PointID": {
+      "type": "string"
+    }
+  }
+}
+
+
