@@ -223,7 +223,6 @@ class Readings(Observations):
         if records:
             for r in records:
                 r['monitoring_point_id'] = self._active_page[0]
-                r['analyte_id'] = self._active_page[1]
             yield from records
 
     def _request_params_hook(self, params):
@@ -236,6 +235,28 @@ class Readings(Observations):
         return "single". Required.
         """
         return "getReadings.ashx"
+
+
+class TotalizerReadings(Observations):
+    cursor_field = "id"
+    primary_key = "id"
+
+    def parse_response(self, response: requests.Response, **kwargs) -> Iterable[Mapping]:
+        """
+        TODO: Override this method to define how a response is parsed.
+        :return an iterable containing each record in the response
+        """
+        records = response.json()['data']
+        if records:
+            for r in records:
+                r['monitoring_point_id'] = self._active_page
+            yield from records
+
+    def path(self, **kwargs) -> str:
+        """
+        return "single". Required.
+        """
+        return "getTotalizers.ashx"
 
 
 # Source
@@ -265,5 +286,6 @@ class SourceIscSevenRivers(AbstractSource):
             MonitoringPoints(authenticator=auth),
             Analytes(authenticator=auth),
             WaterLevels(authenticator=auth),
-            Readings(authenticator=auth)
+            Readings(authenticator=auth),
+            TotalizerReadings()
         ]
