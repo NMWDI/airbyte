@@ -253,9 +253,9 @@ class SourceOnerainApi(Source):
                     "type":"number",
                     "description":"this is the value supplied by the source system. It is the value before any conversion or validation is applied.",
                 },
-
                 "units": {"type":"string", "description": "unit type used in measurement"} 
-                    
+
+
             }
         }
 
@@ -630,4 +630,3 @@ def data_range(dt_start,dt_end,increment_days):
             yield dt_start,dt_incremental_end
             # start is now last end range plus 1 second
             dt_start = add_time_seconds(dt_incremental_end,1)
- 
