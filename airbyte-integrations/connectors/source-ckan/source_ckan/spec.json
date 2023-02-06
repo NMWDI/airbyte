@@ -9,7 +9,7 @@
     "properties": {
       "resource_id": {
         "type": "string",
-        "description": "Resource ID to specific New Mexico Reservoir CSV"
+        "description": "Resource ID to specific CKAN dataset"
       }
     }
   }
