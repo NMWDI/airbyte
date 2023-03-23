@@ -28,12 +28,22 @@ RAND_STRING_WITH_NAME_MSG3 = "".join(["LEWIS N DIVERSION_", rand_string])
 
 @pytest.fixture
 def config_isc():
-    return {"config": {"destination_path": "http://.../FROST-Server/v1.1", "name": "ISC Seven Rivers Monitoring Points", "description": "ISC Seven Rivers Monitoring Point Locations", "agency": "ISC_SEVEN_RIVERS", "source_api": "https://nmisc-wf.gladata.com/api/", "observation_category": "levels" }}
+    return {"config": {"destination_path": "http://34.106.60.230:8080/FROST-Server/v1.1", "name": "ISC Seven Rivers Monitoring Points", "description": "ISC Seven Rivers Monitoring Point Locations", "agency": "ISC_SEVEN_RIVERS", "source_api": "https://nmisc-wf.gladata.com/api/", "observation_category": "levels" }}
 
 
 @pytest.fixture
 def config_pecos():
-    return {"config": {"destination_path": "http://.../FROST-Server/v1.1", "name": "Pecos Valley Locations", "description": "Pecos Valley Well Locations", "agency": "PVACD", "observation_category": "levels" }}
+    return {"config": {"destination_path": "http://34.106.60.230:8080/FROST-Server/v1.1", "name": "Pecos Valley Locations", "description": "Pecos Valley Well Locations", "agency": "PVACD", "observation_category": "levels" }}
+
+
+@pytest.fixture
+def config_nmbgmr():
+    return {"config": {"destination_path": "http://34.106.60.230:8080/FROST-Server/v1.1", "name": "NMBGMR Wells", "description": "NMBGMR Wells", "agency": "NMBGMR", "observation_category": "levels" }}
+
+
+@pytest.fixture
+def config_ebid():
+    return {"config": {"destination_path": "http://34.106.60.230:8080/FROST-Server/v1.1", "name": "EBID Locations", "description": "EBID Locations", "agency": "EBID", "observation_category": "levels" }}
 
 
 @pytest.fixture
@@ -105,7 +115,7 @@ def airbyte_message6_pecos():
     return AirbyteMessage(
         type=Type.RECORD,
         record=AirbyteRecordMessage(
-            stream="pecos_locations", data={"id": "228", "name": rand_string_with_name, "type": "Unknown", "comments": "", "latitude": "32.6", "longitude": -104.4, "_airbyte_ab_id": "103f9bbb-c847-4f13-b87a-16a88ef77afc"}, emitted_at=int(datetime.now().timestamp()) * 1000
+            stream="pecos_locations", data={"id": "228", "name": rand_string_with_name, "type": "Unknown", "comments": "", "latitude": "32.6", "longitude": -104.4, "use": "active_monitoring", "aquifer": "Permian Aquifer System", "aquifer_group": "Permian Aquifer System", "model_formation": "SanAndreas", "_airbyte_ab_id": "103f9bbb-c847-4f13-b87a-16a88ef77afc"}, emitted_at=int(datetime.now().timestamp()) * 1000
         ),
     )
 
