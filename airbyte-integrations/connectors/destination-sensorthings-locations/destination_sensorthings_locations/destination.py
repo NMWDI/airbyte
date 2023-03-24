@@ -48,7 +48,8 @@ class DestinationSensorthingsLocations(Destination):
 
         self._config = config
         self._service = fsc.SensorThingsService(config["destination_path"])
-        self._validation_service = "https://nmwdistvalidation-dot-waterdatainitiative-271000.appspot.com/validate_location?url="
+        self._validation_service = "https://nmwdistvalidation-dot-waterdatainitiative-271000.appspot.com/"
+        #self._validation_service = "https://nmwdistvalidation-dot-waterdatainitiative-271000.appspot.com/validate_location?url="
 
         for message in input_messages:
             if message.type == Type.RECORD:
@@ -61,6 +62,8 @@ class DestinationSensorthingsLocations(Destination):
                 self._validate_location(location)
 
                 self._make_thing(location, data)
+                
+                self._validate_thing(location)
 
 
     def _make_location(self, data):
@@ -76,7 +79,8 @@ class DestinationSensorthingsLocations(Destination):
         if len(locations.entities) > 1:
             #Log error
             logger.error(f"Multiple locations with the name [{name}] exist")
-            
+           
+            # Need to grab a single location entity to return from method
             for location in locations: 
                 pass
 
@@ -210,7 +214,7 @@ class DestinationSensorthingsLocations(Destination):
     def _validate_location(self, location):
         location_iotid = location.id
 
-        validation_resp = requests.get(f'{self._validation_service}{self._service.url}/Locations({location_iotid})')
+        validation_resp = requests.get(f'{self._validation_service}validate_location?url={self._service.url}/Locations({location_iotid})')
 
         response_json = validation_resp.json()
 
@@ -218,10 +222,39 @@ class DestinationSensorthingsLocations(Destination):
 
         # Log error if call to validation service fails
         if validation_resp.status_code != 200:
-            logger.error(f"Validaton service error call for location id [{location_iotid}]: {validation_resp.content}")
+            logger.error(f"Validaton service error call for location {self._service.url}/Locations({location_iotid}) - {validation_resp.content}")
  
         elif "validation_error" in validation_json:
-            logger.error(f"Validaton error for location id [{location_iotid}]: {response_json}")
+            logger.error(f"Validaton error for location {self._service.url}/Locations({location_iotid}) -  {validation_json}")
+
+
+    def _validate_thing(self, location):
+        location_iotid = location.id
+
+        location_thing_url = f'{self._service.url}/Locations({location_iotid})/Things'
+
+        r = requests.get(location_thing_url)
+
+        response_json = r.json()
+
+        response_json_values = response_json["value"]
+
+        for thing in response_json_values:
+            if thing["name"] == "Water Well":
+                thing_url = response_json_values[0]["@iot.selfLink"]
+
+                validation_resp = requests.get(f'{self._validation_service}validate_thing?url={thing_url}')
+
+                response_json = validation_resp.json()
+
+                validation_json = response_json[0]
+
+                # Log error if call to validation service fails
+                if validation_resp.status_code != 200:
+                    logger.error(f"Validaton service error call for thing {thing_url} - {validation_resp.content}")
+         
+                elif "validation_error" in validation_json:
+                    logger.error(f"Validaton error for thing {thing_url} - {validation_json}")
 
 
     def _make_location_properties(self, data):
