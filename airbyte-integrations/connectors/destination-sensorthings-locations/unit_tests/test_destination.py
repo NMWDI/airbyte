@@ -120,6 +120,20 @@ def airbyte_message6_pecos():
     )
 
 
+@pytest.fixture
+def airbyte_message7_nmbgmr():
+    rand_string = ''.join(random.choices(string.ascii_lowercase + string.digits, k=10))
+    rand_string_with_name = "".join(["BW-0505_", rand_string])
+
+    return AirbyteMessage(
+        type=Type.RECORD,
+        record=AirbyteRecordMessage(
+            stream="pecos_locations", data={"id": "228", "PointID": rand_string_with_name, "type": "Unknown", "comments": "", "Easting": 406530.0, "Northing": 3951847.0, "Altitude": 6669.10986, "AltitudeAccuracy": None, "WellDepth": 765.0, "CasingDiameter": 0.5600, "HoleDepth": 765.0, "_airbyte_ab_id": "103f9bbb-c847-4f13-b87a-16a88ef77afc"}, emitted_at=int(datetime.now().timestamp()) * 1000
+        ),
+    )
+
+
+
 @pytest.fixture(name="configured_catalog_isc")
 def configured_catalog_fixture_isc() -> ConfiguredAirbyteCatalog:
     stream_schema = {"type": "object", "properties": {"id": {"type": "integer"}, "name": {"type": "string"}, "type": {"type": "string"}, "comments": {"type": "string"}, "latitude": {"type": "number"}, "longitude": {"type": "number"}, "groundSurfaceElevationFeet": {"type": "number"}, "_airbyte_ab_id": {"type": "string"}}}
@@ -154,6 +168,20 @@ def configured_catalog_fixture_pecos() -> ConfiguredAirbyteCatalog:
     return ConfiguredAirbyteCatalog(streams=[append_stream])
 
 
+@pytest.fixture(name="configured_catalog_nmbgmr")
+def configured_catalog_fixture_nmbgmr() -> ConfiguredAirbyteCatalog:
+    stream_schema = {"type": "object", "properties": {"id": {"type": "integer"}, "PointID": {"type": "string"}, "type": {"type": "string"}, "comments": {"type": "string"}, "Easting": {"type": "number"}, "Northing": {"type": "number"}, "Altitude": {"type": "number"}, "AltitudeAccuracy": {"type": "number"}, "WellDepth": {"type": "number"}, "CasingDiameter": {"type": "number"}, "HoleDepth": {"type": "number"}, "_airbyte_ab_id": {"type": "string"}}}
+
+    append_stream = ConfiguredAirbyteStream(
+        stream=AirbyteStream(name="append_stream", json_schema=stream_schema, supported_sync_modes=[SyncMode.incremental]),
+        sync_mode=SyncMode.incremental,
+        destination_sync_mode=DestinationSyncMode.append,
+    )
+    
+    return ConfiguredAirbyteCatalog(streams=[append_stream])
+
+
+
 def test_check_connection(config_isc):
 
     destination = DestinationSensorthingsLocations()
@@ -164,7 +192,7 @@ def test_check_connection(config_isc):
 
     assert status.status == Status.SUCCEEDED
 
-    
+
 def test_write_isc(
     config_isc,
     request,
@@ -202,3 +230,17 @@ def test_write_pecos(
     assert True
 
 
+def test_write_nmbgmr(
+    config_nmbgmr,
+    request,
+    configured_catalog_nmbgmr: ConfiguredAirbyteCatalog,
+    airbyte_message7_nmbgmr: AirbyteMessage,
+):
+
+    config_unpacked = config_nmbgmr['config']
+
+    destination = DestinationSensorthingsLocations()
+
+    generator = destination.write(config_unpacked, configured_catalog_nmbgmr, [airbyte_message7_nmbgmr])
+
+    assert True

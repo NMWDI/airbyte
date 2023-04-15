@@ -49,7 +49,6 @@ class DestinationSensorthingsLocations(Destination):
         self._config = config
         self._service = fsc.SensorThingsService(config["destination_path"])
         self._validation_service = "https://nmwdistvalidation-dot-waterdatainitiative-271000.appspot.com/"
-        #self._validation_service = "https://nmwdistvalidation-dot-waterdatainitiative-271000.appspot.com/validate_location?url="
 
         for message in input_messages:
             if message.type == Type.RECORD:
@@ -173,7 +172,7 @@ class DestinationSensorthingsLocations(Destination):
         else:
             # Thing entity for create
             thing = fsc.Thing(name = "Water Well",
-                              description = "999Well drilled or set into subsurface for the purposes of pumping water or monitoring groundwater",
+                              description = "Well drilled or set into subsurface for the purposes of pumping water or monitoring groundwater",
                               properties = thing_props)
 
             # Add location entity to thing entity
@@ -218,14 +217,18 @@ class DestinationSensorthingsLocations(Destination):
 
         response_json = validation_resp.json()
 
-        validation_json = response_json[0]
+        try:
+            validation_json = response_json[0]
+            validation_json_error = False
+        except:
+            validation_json_error = True
 
         # Log error if call to validation service fails
-        if validation_resp.status_code != 200:
-            logger.error(f"Validaton service error call for location {self._service.url}/Locations({location_iotid}) - {validation_resp.content}")
+        if validation_resp.status_code != 200 or validation_json_error:
+            logger.error(f"Validation service error call for location {self._service.url}/Locations({location_iotid}) - {validation_resp.content}")
  
         elif "validation_error" in validation_json:
-            logger.error(f"Validaton error for location {self._service.url}/Locations({location_iotid}) -  {validation_json}")
+            logger.error(f"Validation error for location {self._service.url}/Locations({location_iotid}) -  {validation_json}")
 
 
     def _validate_thing(self, location):
@@ -247,61 +250,75 @@ class DestinationSensorthingsLocations(Destination):
 
                 response_json = validation_resp.json()
 
-                validation_json = response_json[0]
+                try:
+                    validation_json = response_json[0]
+                    validation_json_error = False
+                except:
+                    validation_json_error = True
 
                 # Log error if call to validation service fails
-                if validation_resp.status_code != 200:
-                    logger.error(f"Validaton service error call for thing {thing_url} - {validation_resp.content}")
+                if validation_resp.status_code != 200 or validation_json_error:
+                    logger.error(f"Validation service error call for thing {thing_url} - {validation_resp.content}")
          
                 elif "validation_error" in validation_json:
-                    logger.error(f"Validaton error for thing {thing_url} - {validation_json}")
+                    logger.error(f"Validation error for thing {thing_url} - {validation_json}")
 
 
     def _make_location_properties(self, data):
 
         # Location base properties
         location_props = {'source_id': data['id'],
-                         'agency': self._config['agency']}
+                         'agency': self._config['agency'],
+                         'collection_agency': self._config['agency']}
+
 
         if self._config['agency'] == "ISC_SEVEN_RIVERS":
-            if 'groundSurfaceElevationFeet' in data:
-                location_props['groundSurfaceElevationFeet'] = data['groundSurfaceElevationFeet']
+            location_props['location_source'] = "unknown"
+            if data['groundSurfaceElevationFeet'] != None:
+                location_props['elevation'] = {"properties": {"accuracy": -1, "source": "unknown"}}
+            else:
+                location_props['elevation'] = {"properties": {"accuracy": -1, "source": "https://epqs.national_map.gov/v1/"}}
+
             if 'source_api' in data:
                 location_props['source_api'] = self._config['source_api']
 
-        elif self._config['agency'] == "NMBGMR":
-            if 'WellID' in data:
-                 location_props['WellID'] = data['WellID']
-            if 'PointID' in data:
-                 location_props['PointID'] = data['PointID']
-            if 'AltDatum' in data:     
-                 location_props['AltDatum'] = data['AltDatum']
-            if 'Altitude' in data:
-                 location_props['Altitude'] = data['Altitude']
 
+        elif self._config['agency'] == "NMBGMR":
+            location_props['location_source'] = "gps"
+            if data['AltitudeAccuracy'] != None:
+                location_props['elevation'] = {"properties": {"accuracy": data['AltitudeAccuracy'], "source": "gps"}}
+            else:
+                if data['Altitude'] != None:
+                    location_props['elevation'] = {"properties": {"accuracy": -1, "source": "gps"}}
+                else:
+                    location_props['elevation'] = {"properties": {"accuracy": -1, "source": "https://epqs.national_map.gov/v1/"}}
+
+                    
         elif self._config['agency'] == "PVACD":
-            if 'use' in data:
-                location_props['use'] = data['use']
-            if 'description' in data:
-                location_props['hydrovu.description'] = data['description']
+            location_props['location_source'] = "unknown"
+            location_props['elevation'] = {"properties": {"accuracy": -1, "source": "https://epqs.national_map.gov/v1/"}}
+
 
         elif self._config['agency'] == "EBID":
+            location_props['location_source'] = 'unknown'
+            if data['elevation'] != None:
+                location_props['elevation'] = {"properties": {"accuracy": -1, "source": "unknown"}}
+            else:
+                location_props['elevation'] = {"properties": {"accuracy": -1, "source": "https://epqs.national_map.gov/v1/"}}
             if 'site_id' in data:
                 location_props['site_id'] = data['site_id']
-            if 'location':
+            if 'location' in data:
                 location_props['location'] = data['location']
-            if 'elevation':
-                location_props['elevation'] = data['elevation']
             if 'or_site_id':
                 location_props['or_site_id'] = data['or_site_id']
-            if 'latitude_dec':
-                location_props['latitude_dec'] = data['latitude_dec']
-            if 'longitude_dec':
-                location_props['longitude_dec'] = data['longitude_dec']
+
 
         elif config['agency'] == "CABQ":
-            if 'reference_elev' in data:
-                location_props['altitude'] = data['reference_elev']
+            location_props['location_source'] = 'unknown'
+            if data['reference_elev'] != None:
+                location_props['elevation'] = {"properties": {"accuracy": -1, "source": "unknown"}}
+            else:
+                location_props['elevation'] = {"properties": {"accuracy": -1, "source": "https://epqs.national_map.gov/v1/"}}
             if 'facility_id' in data:
                 location_props['facility_id'] = data['facility_id']
             if 'facility_code' in data:
@@ -315,27 +332,68 @@ class DestinationSensorthingsLocations(Destination):
     def _make_thing_properties(self, data):
         # Thing base properties
         thing_props = {'source_id': data['id'],
-                 'agency': self._config['agency']}
+                 'agency': self._config['agency'],
+                 'well_depth': {"value": -1, "units": "mbgs"},
+                 'kind': "unknown",
+                 'current_use': "unknown",
+                 'status': "unknown"
+                 }
+
 
         if self._config['agency'] == "ISC_SEVEN_RIVERS":
             if 'type' in data:
                 thing_props['type'] = data['type']
 
+
         elif self._config['agency'] == "NMBGMR":
-            if 'CurrentUseDescription' in data:
-                thing_props['Use'] = data['CurrentUseDescription']
-            if 'StatusDescription' in data:
-                thing_props['Status'] = data['StatusDescription']
-            if 'WellID' in data:
-                thing_props['WellID'] = data['WellID']
-            if 'PointID' in data:
-                thing_props['PointID'] = data['PointID']
-            if 'WellDepth' in data:
-                thing_props['WellDepth'] = data['WellDepth']
+            if data['WellDepth'] != None:
+                thing_props['well_depth'] = {"value": self._feet_to_meters(data['WellDepth']), "units": "mbgs"}
+
+            if "SiteType" in data:
+                thing_props['kind'] = data['SiteType']
+
+            if "CurrentUseDescription" in data:
+                thing_props['current_use'] = data['CurrentUseDescription']
+
+            if "StatusDescription" in data:
+                thing_props['status'] = data['StatusDescription']
+
+            if "OSEWelltagID" in data:
+                thing_props['ose_well_tag'] = data['OSEWelltagID']
+
+            if "CompletionDate" in data:
+                thing_props['completion_date'] = data['CompletionDate']
+
+            if "ConstructionMethod" in data:
+                thing_props['construction_method'] = data['ConstructionMethod']
+
             if 'GeologicFormation' in data:
-                thing_props['GeologicFormation'] = data['GeologicFormation']
+                thing_props['geologic_formation'] = data['GeologicFormation']
+
+            if data['CasingDiameter'] != None:
+                thing_props['casing'] = {"diameter": self._feet_to_meters(data['CasingDiameter']), "units": "meters"} 
+            else:
+                thing_props['casing'] = {"value": -1, "units": "meters"}
+               
+            if "AquiferType" in data:
+                thing_props['aquifer'] = data['AquiferType']
+
+            if data['HoleDepth'] != None:
+                thing_props['hole_depth'] = {"value": self._feet_to_meters(data['HoleDepth']), "units": "mbgs"}
+            else:
+                thing_props['hole_depth'] = {"value": -1, "units": "mbgs"}
+
+            if 'CurrentUseDescription' in data:
+                thing_props['use'] = data['CurrentUseDescription']
+            
 
         elif self._config['agency'] == "PVACD":
+            thing_props['kind'] = "groundwater_well"
+
+            thing_props['current_use'] = "monitoring_well"
+
+            # Below are not in BQ but in ST
+            # Put this info into BQ
             if 'aquifer' in data:
                 thing_props['aquifer'] = data['aquifer']
             if 'aquifer_group' in data:
@@ -343,30 +401,73 @@ class DestinationSensorthingsLocations(Destination):
             if 'model_formation' in data:
                 thing_props['model_formation'] = data['model_formation']
 
+
+        elif self._config['agency'] == "EBID":
+            pass
+
+
+        elif self._config['agency'] == "CABQ":
+            # Check empty str w/ more data
+            if data['measured_depth_of_well'] != '""':
+                thing_props['well_depth'] = {"value": self._feet_to_meters(data['measured_depth_of_well']), "units": "mbgs"}
+
         return thing_props
 
 
+    # Add elevation as the 3rd coord and convert ft above sea level to meters above sea level
     def _make_location_location(self, data):
-        if self._config['agency'] == 'NMBGMR':
+        if self._config['agency'] == "ISC_SEVEN_RIVERS":
+            if data['groundSurfaceElevationFeet'] != None:
+                elev_m = self._feet_to_meters(data['groundSurfaceElevationFeet'])
+            else:
+                # Query elevation service
+                elev_m = self._get_elevation(data['latitude'], data['longitude']) 
+
+            loc = self._make_geometry_point_from_lat_lon_elev(data['latitude'], data['longitude'], elev_m)
+
+
+        elif self._config['agency'] == 'NMBGMR':
             e = data['Easting']
             n = data['Northing']
             z = 13
-            loc = self._make_geometry_point_from_utm(e, n, z)
-        
-        elif self._config['agency'] == "EBID":
-            loc = self._make_geometry_point_from_latlon(data['latitude_dec'], data['longitude_dec'])
+            loc = self._make_geometry_point_from_utm(e, n, data['Altitude'], z)
+       
 
+        elif self._config['agency'] == "EBID":
+            if data['elevation'] != None:
+                elev_m = self._feet_to_meters(data['elevation'])
+            else:
+                # Query elevation service
+                elev_m = self._get_elevation(data['latitude'], data['longitude']) 
+            
+            loc = self._make_geometry_point_from_lat_lon_elev(data['latitude_dec'], data['longitude_dec'], elev_m)
+
+
+        elif self._config['agency'] == "PVACD":
+            # Query elevation service
+            elev_m = self._get_elevation(data['latitude'], data['longitude']) 
+            loc = self._make_geometry_point_from_lat_lon_elev(data['latitude'], data['longitude'], elev_m)
+
+
+        # Currently just query elevation service for else
         else:
-            loc = self._make_geometry_point_from_latlon(data['latitude'], data['longitude'])
+            # Query elevation service
+            elev_m = self._get_elevation(data['latitude'], data['longitude']) 
+            loc = self._make_geometry_point_from_lat_lon_elev(data['latitude'], data['longitude'], elev_m)
+
 
         return loc
 
 
-    def _make_geometry_point_from_latlon(self, lat, lon):
-        return {"type": "Point", "coordinates": [float(lon), float(lat)]}
+    def _feet_to_meters(self, ft):
+        return ft * 0.3048
 
 
-    def _make_geometry_point_from_utm(self, e, n, zone=None, ellps=None, srid=None):
+    def _make_geometry_point_from_lat_lon_elev(self, lat, lon, elev):
+        return {"type": "Point", "coordinates": [float(lon), float(lat), float(elev)]}
+
+
+    def _make_geometry_point_from_utm(self, e, n, altitude, zone=None, ellps=None, srid=None):
         if zone:
             if zone in PROJECTIONS:
                 p = PROJECTIONS[zone]
@@ -385,7 +486,21 @@ class DestinationSensorthingsLocations(Destination):
                 p = pyproj.Proj("EPSG:{}".format(srid))
 
         lon, lat = p(e, n, inverse=True)
-        return self._make_geometry_point_from_latlon(lat, lon)
+
+        if altitude != None:
+            elev_m = self._feet_to_meters(altitude)
+        else:
+            # Query elevation service
+            elev_m = self._get_elevation(lat, lon) 
+
+        return self._make_geometry_point_from_lat_lon_elev(lat, lon, elev_m)
+
+
+    def _get_elevation(self, lat, lon):
+        url = 'https://epqs.nationalmap.gov/v1/json'
+        r = requests.get(url, params={'x': lon, 'y': lat, 'units': 'Meters', 'output': 'json'})
+        data = r.json()
+        return data['value']
 
 
     def _get_name_from_record(self, data):

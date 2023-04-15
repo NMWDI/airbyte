@@ -9,6 +9,8 @@ RUN apk --no-cache upgrade \
     && pip install --upgrade pip \
     && apk --no-cache add tzdata build-base
 
+RUN apk --no-cache add proj proj-dev proj-util
+RUN pip install --no-cache-dir pyproj==3.2.1
 
 COPY setup.py ./
 # install necessary packages to a temporary folder
