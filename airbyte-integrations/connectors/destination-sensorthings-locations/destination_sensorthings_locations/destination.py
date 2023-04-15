@@ -11,8 +11,8 @@ from airbyte_cdk.models import AirbyteConnectionStatus, AirbyteMessage, Configur
 
 import frost_sta_client as fsc
 
-from google.cloud import bigquery
-from google.oauth2 import service_account
+#from google.cloud import bigquery
+#from google.oauth2 import service_account
 import os
 import requests
 from datetime import datetime
@@ -51,7 +51,15 @@ class DestinationSensorthingsLocations(Destination):
         self._validation_service = "https://nmwdistvalidation-dot-waterdatainitiative-271000.appspot.com/"
 
         for message in input_messages:
+
+            logger.info(f'Message: {message}')
+            logger.info(f'========================')
+
             if message.type == Type.RECORD:
+
+                logger.info(f'RECORD Message: {message}')
+                logger.info(f'========================')
+
                 data = message.record.data
 
                 stream = message.record.stream
@@ -63,6 +71,19 @@ class DestinationSensorthingsLocations(Destination):
                 self._make_thing(location, data)
                 
                 self._validate_thing(location)
+
+
+            elif message.type == Type.STATE:
+                logger.info(f'STATE Message: {message}')
+                logger.info(f'========================')
+
+                yield message
+
+
+            else:
+                logger.info(f'Not Record Message: {message}')
+                logger.info(f'========================')
+
 
 
     def _make_location(self, data):
@@ -188,7 +209,7 @@ class DestinationSensorthingsLocations(Destination):
 
         # Location dict for patch
         location_obj = {'name': name,
-                        'description': self._config['description'],
+                        'description': 'Location of well where measurements are made',
                         'location': loc,
                         'properties': props,
                         'encodingType': "application/vnd.geo+json", }
