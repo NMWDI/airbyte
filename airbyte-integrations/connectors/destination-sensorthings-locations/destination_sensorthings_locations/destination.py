@@ -338,6 +338,7 @@ class DestinationSensorthingsLocations(Destination):
 
 
         elif config['agency'] == "CABQ":
+            location_props['source_id'] = data['facility_id']
             location_props['location_source'] = 'unknown'
             if data['reference_elev'] != None:
                 location_props['elevation'] = {"properties": {"accuracy": -1, "source": "unknown"}}
@@ -355,8 +356,7 @@ class DestinationSensorthingsLocations(Destination):
 
     def _make_thing_properties(self, data):
         # Thing base properties
-        thing_props = {'source_id': data['id'],
-                 'agency': self._config['agency'],
+        thing_props = {'agency': self._config['agency'],
                  'well_depth': {"value": -1, "units": "mbgs"},
                  'kind': "unknown",
                  'current_use': "unknown",
@@ -365,11 +365,13 @@ class DestinationSensorthingsLocations(Destination):
 
 
         if self._config['agency'] == "ISC_SEVEN_RIVERS":
+            thing_props['source_id'] = data['id']
             if 'type' in data:
                 thing_props['type'] = data['type']
 
 
         elif self._config['agency'] == "NMBGMR":
+            thing_props['source_id'] = data['OBJECTID']
             if data['WellDepth'] != None:
                 thing_props['well_depth'] = {"value": self._feet_to_meters(data['WellDepth']), "units": "mbgs"}
 
@@ -412,8 +414,8 @@ class DestinationSensorthingsLocations(Destination):
             
 
         elif self._config['agency'] == "PVACD":
+            thing_props['source_id'] = data['id']
             thing_props['kind'] = "groundwater_well"
-
             thing_props['current_use'] = "monitoring_well"
 
             # Below are not in BQ but in ST
@@ -427,10 +429,11 @@ class DestinationSensorthingsLocations(Destination):
 
 
         elif self._config['agency'] == "EBID":
-            pass
+            thing_props['source_id'] = data['site_id']
 
 
         elif self._config['agency'] == "CABQ":
+            thing_props['source_id'] = data['facility_id']
             # Check empty str w/ more data
             if data['measured_depth_of_well'] != '""':
                 thing_props['well_depth'] = {"value": self._feet_to_meters(data['measured_depth_of_well']), "units": "mbgs"}
