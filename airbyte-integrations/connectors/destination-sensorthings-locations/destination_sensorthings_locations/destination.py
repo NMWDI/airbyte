@@ -288,12 +288,12 @@ class DestinationSensorthingsLocations(Destination):
     def _make_location_properties(self, data):
 
         # Location base properties
-        location_props = {'source_id': data['id'],
-                         'agency': self._config['agency'],
+        location_props = {'agency': self._config['agency'],
                          'collection_agency': self._config['agency']}
 
 
         if self._config['agency'] == "ISC_SEVEN_RIVERS":
+            location_props['source_id'] = data['id']
             location_props['location_source'] = "unknown"
             if data['groundSurfaceElevationFeet'] != None:
                 location_props['elevation'] = {"properties": {"accuracy": -1, "source": "unknown"}}
@@ -305,6 +305,7 @@ class DestinationSensorthingsLocations(Destination):
 
 
         elif self._config['agency'] == "NMBGMR":
+            location_props['source_id'] = data['OBJECTID']
             location_props['location_source'] = "gps"
             if data['AltitudeAccuracy'] != None:
                 location_props['elevation'] = {"properties": {"accuracy": data['AltitudeAccuracy'], "source": "gps"}}
@@ -316,11 +317,13 @@ class DestinationSensorthingsLocations(Destination):
 
                     
         elif self._config['agency'] == "PVACD":
+            location_props['source_id'] = data['id']
             location_props['location_source'] = "unknown"
             location_props['elevation'] = {"properties": {"accuracy": -1, "source": "https://epqs.national_map.gov/v1/"}}
 
 
         elif self._config['agency'] == "EBID":
+            location_props['source_id'] = data['site_id']
             location_props['location_source'] = 'unknown'
             if data['elevation'] != None:
                 location_props['elevation'] = {"properties": {"accuracy": -1, "source": "unknown"}}
