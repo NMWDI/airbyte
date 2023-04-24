@@ -67,6 +67,9 @@ class DestinationSensorthingsLocations(Destination):
             elif message.type == Type.STATE:
                 yield message
 
+            else:
+                yield message
+
 
     def _make_location(self, data):
         # does this location exist
