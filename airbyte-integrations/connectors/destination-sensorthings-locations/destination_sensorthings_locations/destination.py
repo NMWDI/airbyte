@@ -16,6 +16,7 @@ from datetime import datetime
 import copy
 import logging
 import pyproj
+import time
 
 logger = logging.getLogger("airbyte")
 
@@ -78,7 +79,7 @@ class DestinationSensorthingsLocations(Destination):
         # Query SensorThings for location name
         locations = self._service.locations().query().filter(f"name eq '{name}'").list()
         location_props = self._make_location_properties(data)
-        loc = self._make_location_location(data)
+        loc = self._make_location_location(data, name)
 
         # Check length of list and log error if more than one location with the same name
         if len(locations.entities) > 1:
@@ -414,13 +415,13 @@ class DestinationSensorthingsLocations(Destination):
 
 
     # Add elevation as the 3rd coord and convert ft above sea level to meters above sea level
-    def _make_location_location(self, data):
+    def _make_location_location(self, data, name):
         if self._config['agency'] == "isc":
             if data['groundSurfaceElevationFeet'] != None and data['groundSurfaceElevationFeet'] > 0.0:
                 elev_m = self._feet_to_meters(data['groundSurfaceElevationFeet'])
             else:
                 # Query elevation service
-                elev_m = self._get_elevation(data['latitude'], data['longitude']) 
+                elev_m = self._get_elevation(data['latitude'], data['longitude'], name)
 
             loc = self._make_geometry_point_from_lat_lon_elev(data['latitude'], data['longitude'], elev_m)
 
@@ -429,7 +430,7 @@ class DestinationSensorthingsLocations(Destination):
             e = data['Easting']
             n = data['Northing']
             z = 13
-            loc = self._make_geometry_point_from_utm(e, n, data['Altitude'], z)
+            loc = self._make_geometry_point_from_utm(e, n, data['Altitude'], name, z)
        
 
         elif self._config['agency'] == "ebid":
@@ -437,21 +438,21 @@ class DestinationSensorthingsLocations(Destination):
                 elev_m = self._feet_to_meters(data['elevation'])
             else:
                 # Query elevation service
-                elev_m = self._get_elevation(data['latitude'], data['longitude']) 
+                elev_m = self._get_elevation(data['latitude_dec'], data['longitude_dec'], name)
             
             loc = self._make_geometry_point_from_lat_lon_elev(data['latitude_dec'], data['longitude_dec'], elev_m)
 
 
         elif self._config['agency'] == "pvacd":
             # Query elevation service
-            elev_m = self._get_elevation(data['latitude'], data['longitude']) 
+            elev_m = self._get_elevation(data['latitude'], data['longitude'], name)
             loc = self._make_geometry_point_from_lat_lon_elev(data['latitude'], data['longitude'], elev_m)
 
 
         # Currently just query elevation service for else
         else:
             # Query elevation service
-            elev_m = self._get_elevation(data['latitude'], data['longitude']) 
+            elev_m = self._get_elevation(data['latitude'], data['longitude'], name)
             loc = self._make_geometry_point_from_lat_lon_elev(data['latitude'], data['longitude'], elev_m)
 
 
@@ -490,16 +491,29 @@ class DestinationSensorthingsLocations(Destination):
             elev_m = self._feet_to_meters(altitude)
         else:
             # Query elevation service
-            elev_m = self._get_elevation(lat, lon) 
+            elev_m = self._get_elevation(lat, lon, name)
 
         return self._make_geometry_point_from_lat_lon_elev(lat, lon, elev_m)
 
 
-    def _get_elevation(self, lat, lon):
+    def _get_elevation(self, lat, lon, name):
         url = 'https://epqs.nationalmap.gov/v1/json'
-        r = requests.get(url, params={'x': lon, 'y': lat, 'units': 'Meters', 'output': 'json'})
-        data = r.json()
-        return data['value']
+        max_retries = 10
+
+        for attempt in range(max_retries):
+            try:
+                r = requests.get(url, params={'x': lon, 'y': lat, 'units': 'Meters', 'output': 'json'})
+                data = r.json()
+                elevation = data['value']
+                return elevation
+
+            except:
+                time.sleep(5)
+
+        #Log error
+        logger.error(f"Error querying USGS EPQS for elevation of [{name}]")
+
+        return -1.0
 
 
     def _get_name_from_record(self, data):
