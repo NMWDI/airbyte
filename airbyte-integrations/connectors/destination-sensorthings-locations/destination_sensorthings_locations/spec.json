@@ -19,10 +19,6 @@
         "type": "string",
         "description": "Agency providing data"
       },
-      "source_api": {
-        "type": "string",
-        "description": "Source API where data is extracted from"
-      },
       "observation_category": {
         "type": "string",
         "description": "Category of observation"

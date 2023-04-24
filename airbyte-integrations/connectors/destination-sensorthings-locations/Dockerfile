@@ -1,4 +1,4 @@
-FROM python:3.9.11-alpine3.15 as base
+FROM python:3.10.11-alpine3.17 as base
 
 # build and load all requirements
 FROM base as builder
@@ -10,7 +10,6 @@ RUN apk --no-cache upgrade \
     && apk --no-cache add tzdata build-base
 
 RUN apk --no-cache add proj proj-dev proj-util
-RUN pip install --no-cache-dir pyproj==3.2.1
 
 COPY setup.py ./
 # install necessary packages to a temporary folder
@@ -26,6 +25,8 @@ COPY --from=builder /install /usr/local
 COPY --from=builder /usr/share/zoneinfo/Etc/UTC /etc/localtime
 RUN echo "Etc/UTC" > /etc/timezone
 
+RUN apk --no-cache add proj proj-dev proj-util
+
 # bash is installed for more convenient debugging.
 RUN apk --no-cache add bash
 
@@ -38,3 +39,4 @@ ENTRYPOINT ["python", "/airbyte/integration_code/main.py"]
 
 LABEL io.airbyte.version=0.1.0
 LABEL io.airbyte.name=airbyte/destination-sensorthings-locations
+
