@@ -289,7 +289,7 @@ class DestinationSensorthingsLocations(Destination):
         elif self._config['agency'] == "nmbgmr":
             location_props['location_source'] = "gps"
             if data['AltitudeAccuracy'] != None:
-                location_props['elevation'] = {"accuracy": data['AltitudeAccuracy'], "source": "gps"}
+                location_props['elevation'] = {"accuracy": float(data['AltitudeAccuracy']), "source": "gps"}
             else:
                 if data['Altitude'] != None:
                     location_props['elevation'] = {"accuracy": 0, "source": "gps"}
@@ -308,11 +308,11 @@ class DestinationSensorthingsLocations(Destination):
                 location_props['elevation'] = {"accuracy": 0, "source": "unknown"}
             else:
                 location_props['elevation'] = {"accuracy": 0, "source": "https://epqs.national_map.gov/v1/"}
-            if 'site_id' in data:
+            if 'site_id' in data and data['site_id'] != None:
                 location_props['site_id'] = data['site_id']
-            if 'location' in data:
+            if 'location' in data and data['location'] != None:
                 location_props['location'] = data['location']
-            if 'or_site_id':
+            if 'or_site_id' and data['or_site_id'] != None:
                 location_props['or_site_id'] = data['or_site_id']
 
 
@@ -322,11 +322,11 @@ class DestinationSensorthingsLocations(Destination):
                 location_props['elevation'] = {"accuracy": 0, "source": "unknown"}
             else:
                 location_props['elevation'] = {"accuracy": 0, "source": "https://epqs.national_map.gov/v1/"}
-            if 'facility_id' in data:
+            if 'facility_id' in data and data['facility_id'] != None:
                 location_props['facility_id'] = data['facility_id']
-            if 'facility_code' in data:
+            if 'facility_code' in data and data['facility_code'] != None:
                 location_props['facility_code'] = data['facility_code']
-            if 'depth_units' in data:
+            if 'depth_units' in data and data['depth_units'] != None:
                 location_props['altitude_units'] = data['depth_units']
 
         return location_props
@@ -343,7 +343,7 @@ class DestinationSensorthingsLocations(Destination):
 
 
         if self._config['agency'] == "isc":
-            if 'type' in data:
+            if 'type' in data and data['type'] != None:
                 thing_props['type'] = data['type']
 
 
@@ -351,25 +351,25 @@ class DestinationSensorthingsLocations(Destination):
             if data['WellDepth'] != None:
                 thing_props['well_depth'] = {"value": self._feet_to_meters(data['WellDepth']), "units": "mbgs"}
 
-            if "SiteType" in data:
+            if "SiteType" in data and data['SiteType'] != None:
                 thing_props['kind'] = data['SiteType']
 
-            if "CurrentUseDescription" in data:
+            if "CurrentUseDescription" in data and data['CurrentUseDescription'] != None:
                 thing_props['current_use'] = data['CurrentUseDescription']
 
-            if "StatusDescription" in data:
+            if "StatusDescription" in data and data['StatusDescription'] != None:
                 thing_props['status'] = data['StatusDescription']
 
-            if "OSEWelltagID" in data:
+            if "OSEWelltagID" in data and data['OSEWelltagID'] != None:
                 thing_props['ose_well_tag'] = data['OSEWelltagID']
 
-            if "CompletionDate" in data:
+            if "CompletionDate" in data and data['CompletionDate'] != None:
                 thing_props['completion_date'] = data['CompletionDate']
 
-            if "ConstructionMethod" in data:
+            if "ConstructionMethod" in data and data['ConstructionMethod'] != None:
                 thing_props['construction_method'] = data['ConstructionMethod']
 
-            if 'GeologicFormation' in data:
+            if 'GeologicFormation' in data and data['GeologicFormation'] != None:
                 thing_props['geologic_formation'] = data['GeologicFormation']
 
             if data['CasingDiameter'] != None:
@@ -377,7 +377,7 @@ class DestinationSensorthingsLocations(Destination):
             else:
                 thing_props['casing'] = {"value": -1, "units": "meters"}
                
-            if "AquiferType" in data:
+            if "AquiferType" in data and data['AquiferType'] != None:
                 thing_props['aquifer'] = data['AquiferType']
 
             if data['HoleDepth'] != None:
@@ -385,7 +385,7 @@ class DestinationSensorthingsLocations(Destination):
             else:
                 thing_props['hole_depth'] = {"value": -1, "units": "mbgs"}
 
-            if 'CurrentUseDescription' in data:
+            if 'CurrentUseDescription' in data and data['CurrentUseDescription'] != None:
                 thing_props['use'] = data['CurrentUseDescription']
             
 
@@ -395,11 +395,11 @@ class DestinationSensorthingsLocations(Destination):
 
             # Below are not in BQ but in ST
             # Put this info into BQ
-            if 'aquifer' in data:
+            if 'aquifer' in data and data['aquifer'] != None:
                 thing_props['aquifer'] = data['aquifer']
-            if 'aquifer_group' in data:
+            if 'aquifer_group' in data and data['aquifer_group'] != None:
                 thing_props['aquifer_group'] = data['aquifer_group']
-            if 'model_formation' in data:
+            if 'model_formation' in data and data['model_formation'] != None:
                 thing_props['model_formation'] = data['model_formation']
 
 
