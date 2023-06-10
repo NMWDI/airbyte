@@ -352,25 +352,25 @@ class DestinationSensorthingsLocations(Destination):
                 thing_props['well_depth'] = {"value": self._feet_to_meters(data['WellDepth']), "units": "mbgs"}
 
             if "SiteType" in data and data['SiteType'] != None:
-                thing_props['kind'] = data['SiteType']
+                thing_props['kind'] = data['SiteType'].replace(",","").replace(" ","_").lower()
 
             if "CurrentUseDescription" in data and data['CurrentUseDescription'] != None:
-                thing_props['current_use'] = data['CurrentUseDescription']
+                thing_props['current_use'] = data['CurrentUseDescription'].replace(",","").replace(" ","_").lower()
 
             if "StatusDescription" in data and data['StatusDescription'] != None:
-                thing_props['status'] = data['StatusDescription']
+                thing_props['status'] = data['StatusDescription'].replace(",","").replace(" ","_").lower()
 
             if "OSEWelltagID" in data and data['OSEWelltagID'] != None:
-                thing_props['ose_well_tag'] = data['OSEWelltagID']
+                thing_props['ose_well_tag'] = data['OSEWelltagID'].replace(",","").replace(" ","_").lower()
 
             if "CompletionDate" in data and data['CompletionDate'] != None:
-                thing_props['completion_date'] = data['CompletionDate']
+                thing_props['completion_date'] = data['CompletionDate'].replace(",","").replace(" ","_").lower()
 
             if "ConstructionMethod" in data and data['ConstructionMethod'] != None:
-                thing_props['construction_method'] = data['ConstructionMethod']
+                thing_props['construction_method'] = data['ConstructionMethod'].replace(",","").replace(" ","_").lower()
 
             if 'GeologicFormation' in data and data['GeologicFormation'] != None:
-                thing_props['geologic_formation'] = data['GeologicFormation']
+                thing_props['geologic_formation'] = data['GeologicFormation'].replace(",","").replace(" ","_").lower()
 
             if data['CasingDiameter'] != None:
                 thing_props['casing'] = {"diameter": self._feet_to_meters(data['CasingDiameter']), "units": "meters"} 
@@ -378,7 +378,7 @@ class DestinationSensorthingsLocations(Destination):
                 thing_props['casing'] = {"value": -1, "units": "meters"}
                
             if "AquiferType" in data and data['AquiferType'] != None:
-                thing_props['aquifer'] = data['AquiferType']
+                thing_props['aquifer'] = data['AquiferType'].replace(",","").replace(" ","_").lower()
 
             if data['HoleDepth'] != None:
                 thing_props['hole_depth'] = {"value": self._feet_to_meters(data['HoleDepth']), "units": "mbgs"}
@@ -386,7 +386,7 @@ class DestinationSensorthingsLocations(Destination):
                 thing_props['hole_depth'] = {"value": -1, "units": "mbgs"}
 
             if 'CurrentUseDescription' in data and data['CurrentUseDescription'] != None:
-                thing_props['use'] = data['CurrentUseDescription']
+                thing_props['use'] = data['CurrentUseDescription'].replace(",","").replace(" ","_").lower()
             
 
         elif self._config['agency'] == "pvacd":
