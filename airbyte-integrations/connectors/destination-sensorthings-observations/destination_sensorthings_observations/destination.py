@@ -27,9 +27,6 @@ logger = logging.getLogger("airbyte")
 PROJECTIONS = {}
 
 
-
-
-
 class DestinationSensorthingsObservations(Destination):
     def write(
         self, config: Mapping[str, Any], configured_catalog: ConfiguredAirbyteCatalog, input_messages: Iterable[AirbyteMessage]
@@ -55,6 +52,11 @@ class DestinationSensorthingsObservations(Destination):
         self._config = config
         self._service = fsc.SensorThingsService(config["destination_path"])
         self._validation_service = "https://nmwdistvalidation-dot-waterdatainitiative-271000.appspot.com/"
+            
+        logger.info(f'========================')
+        logger.info(f'========================')
+        logger.info(f'========================')
+        logger.info(f'========================')
 
         for message in input_messages:
 
@@ -70,13 +72,15 @@ class DestinationSensorthingsObservations(Destination):
 
                 stream = message.record.stream
 
-                #location = self._make_location(data)
+                datastream = self._make_datastream(data)
 
-                #self._validate_location(location)
+                self._validate_datastream(datastream)
 
-                #self._make_thing(location, data)
+                self._make_observation(datastream, data)
                 
-                #self._validate_thing(location)
+                self._validate_observation(datastream)
+
+
 
 
             elif message.type == Type.STATE:
@@ -113,7 +117,6 @@ class DestinationSensorthingsObservations(Destination):
         """
         try:
             x = requests.request("CONNECT", config["destination_path"])
-
 
             return AirbyteConnectionStatus(status=Status.SUCCEEDED)
         except Exception as e:
