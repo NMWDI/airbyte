@@ -7,9 +7,13 @@ from setuptools import find_packages, setup
 
 MAIN_REQUIREMENTS = [
     "airbyte-cdk",
+    "frost_sta_client"
 ]
 
-TEST_REQUIREMENTS = ["pytest~=6.2"]
+TEST_REQUIREMENTS = [
+        "pytest~=6.2",
+        "pytest-mock~=3.6.1"
+        ]
 
 setup(
     name="destination_sensorthings_observations",

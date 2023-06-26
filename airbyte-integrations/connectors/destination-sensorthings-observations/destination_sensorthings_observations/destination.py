@@ -52,12 +52,15 @@ class DestinationSensorthingsObservations(Destination):
         :return: Iterable of AirbyteStateMessages wrapped in AirbyteMessage structs
         """
 
+        print ("\n check !!!!!!!!22222")
 
         self._config = config
         self._service = fsc.SensorThingsService(config["destination_path"])
         self._validation_service = "https://nmwdistvalidation-dot-waterdatainitiative-271000.appspot.com/"
             
         logger.info(f'========================')
+
+        print ('1111')
 
         for message in input_messages:
 
@@ -154,12 +157,11 @@ class DestinationSensorthingsObservations(Destination):
                     # Add empty dict for properties??
                     datastream = fsc.Datastream(name="Groundwater Levels",
                                             description='Measurement of groundwater depth in a water well, as measured below ground surface',
-                                            observation_type="http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement"
-                                            observed_area=location.location
-                                            properties={"topic", "Water Quantity"}
+                                            observation_type="http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
+                                            observed_area=location.location,
+                                            properties={"topic", "Water Quantity"},
                                             unit_of_measurement=unit_of_measurement_dict)
                     self._service.create(datastream)
-
 
     def _query_things_for_datastream_url(self, iotid):
 
@@ -186,7 +188,7 @@ class DestinationSensorthingsObservations(Destination):
                     datastream_url = response_json_values[0]["Datastreams@iot.navigationLink"]
 
 
-    def _query_for_datastream_existence(self, datastream_url)
+    def _query_for_datastream_existence(self, datastream_url):
         
         r = requests.get(datastream_url)
 
@@ -207,7 +209,7 @@ class DestinationSensorthingsObservations(Destination):
         return datastream_found
 
 
-    def _get_source_id_from_record(self, data)
+    def _get_source_id_from_record(self, data):
 
         source_id = 0
 
@@ -239,6 +241,9 @@ class DestinationSensorthingsObservations(Destination):
 
         :return: AirbyteConnectionStatus indicating a Success or Failure
         """
+
+        print ("\n check !!!!!!!!1")
+
         try:
             x = requests.request("CONNECT", config["destination_path"])
 
