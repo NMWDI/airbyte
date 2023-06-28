@@ -64,6 +64,7 @@ class DestinationSensorthingsLocations(Destination):
                 
                 self._validate_thing(location)
 
+                yield message
 
             elif message.type == Type.STATE:
                 yield message
@@ -467,7 +468,7 @@ class DestinationSensorthingsLocations(Destination):
         return {"type": "Point", "coordinates": [float(lon), float(lat), float(elev)]}
 
 
-    def _make_geometry_point_from_utm(self, e, n, altitude, zone=None, ellps=None, srid=None):
+    def _make_geometry_point_from_utm(self, e, n, altitude, name, zone=None, ellps=None, srid=None):
         if zone:
             if zone in PROJECTIONS:
                 p = PROJECTIONS[zone]
