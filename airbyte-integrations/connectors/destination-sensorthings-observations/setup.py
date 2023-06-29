@@ -7,7 +7,9 @@ from setuptools import find_packages, setup
 
 MAIN_REQUIREMENTS = [
     "airbyte-cdk",
-    "frost_sta_client"
+    "frost_sta_client",
+    "google-cloud",
+    "google.cloud.bigquery"
 ]
 
 TEST_REQUIREMENTS = [

@@ -7,14 +7,14 @@ from typing import Any, Iterable, Mapping
 
 from airbyte_cdk import AirbyteLogger
 from airbyte_cdk.destinations import Destination
-from airbyte_cdk.models import AirbyteConnectionStatus, AirbyteMessage, ConfiguredAirbyteCatalog, Status
+from airbyte_cdk.models import AirbyteConnectionStatus, AirbyteMessage, ConfiguredAirbyteCatalog, Status, Type
 
 
 import frost_sta_client as fsc
 
 
-#from google.cloud import bigquery
-#from google.oauth2 import service_account
+from google.cloud import bigquery
+from google.oauth2 import service_account
 import os
 import requests
 from datetime import datetime
@@ -27,8 +27,21 @@ logger = logging.getLogger("airbyte")
 PROJECTIONS = {}
 
 
+print ('\n================')
+cwd = os.getcwd()
+
+print (cwd)
+cred_file = os.path.join(cwd, "secrets/bq_creds.json")
+
+print (cred_file)
+
+print ('\n================')
+
 # Credentials to a GCP BigQuery table
-#CREDENTIALS = service_account.Credentials.from_service_account_file("")
+#CREDENTIALS = service_account.Credentials.from_service_account_file("./secrets/bq_creds.json")
+
+
+CREDENTIALS = service_account.Credentials.from_service_account_file(cred_file)
 
 
 class DestinationSensorthingsObservations(Destination):
@@ -54,6 +67,12 @@ class DestinationSensorthingsObservations(Destination):
 
         print ("\n check !!!!!!!!22222")
 
+        print ('\n================')
+        print (CREDENTIALS)
+        print ('\n================')
+
+
+
         self._config = config
         self._service = fsc.SensorThingsService(config["destination_path"])
         self._validation_service = "https://nmwdistvalidation-dot-waterdatainitiative-271000.appspot.com/"
@@ -78,12 +97,13 @@ class DestinationSensorthingsObservations(Destination):
 
                 datastream = self._make_datastream(data)
 
-                self._validate_datastream(datastream)
+                #self._validate_datastream(datastream)
 
-                self._make_observation(datastream, data)
+                #self._make_observation(datastream, data)
                 
-                self._validate_observation(datastream)
+                #self._validate_observation(datastream)
 
+                yield message
 
             elif message.type == Type.STATE:
                 logger.info(f'STATE Message: {message}')
@@ -96,6 +116,7 @@ class DestinationSensorthingsObservations(Destination):
                 logger.info(f'Not Record Message: {message}')
                 logger.info(f'========================')
 
+                yield message
 
 
     def _make_datastream(self, data):
@@ -121,8 +142,40 @@ class DestinationSensorthingsObservations(Destination):
 
         # TODO: Add agency to query
         # Query SensorThings Locations for source_id
-        locations = self._service.locations().query().filter(f"source_id eq '{source_id}'").list()
+        #locations = self._service.locations().query().filter(f"source_id eq '{source_id}'").list()
 
+        # Query BigQuery for source_id
+        client = bigquery.Client(credentials=CREDENTIALS)
+
+        #source_id_str = str(source_id)
+        #source_id_str = str(180)
+
+        print (source_id)
+
+        #sql = 'select * from locations.isc_seven_rivers_monitoring_points '
+        #sql = f'select * from locations.isc_seven_rivers_monitoring_points where id = {source_id_str}'
+
+        #Works for isc b/c id is a str
+        sql = f'select * from locations.isc_seven_rivers_monitoring_points where id = "{source_id}"'
+        
+        #Works
+        #sql = f'select * from locations.isc_seven_rivers_monitoring_points where id = "180"'
+
+        job = client.query(sql)
+
+        result = job.result()
+        
+        print ('\n33333333333333================')
+        print (result)
+        print ('\n33333333333333================')
+
+        for record in result:
+            print (record)
+
+        print (source_id)
+        print ('\n4444444================')
+
+        """
         # Check length of list and log error if more than one location with the same source_id
         if len(locations.entities) > 1:
             #Log error
@@ -162,6 +215,9 @@ class DestinationSensorthingsObservations(Destination):
                                             properties={"topic", "Water Quantity"},
                                             unit_of_measurement=unit_of_measurement_dict)
                     self._service.create(datastream)
+
+        """      
+
 
     def _query_things_for_datastream_url(self, iotid):
 
@@ -211,12 +267,19 @@ class DestinationSensorthingsObservations(Destination):
 
     def _get_source_id_from_record(self, data):
 
+
+        print ("1111@@@@@@@@@@@@@@@@@@2222")
+        print (self._config['agency'])
+        print ("1111@@@@@@@@@@@@@@@@@@2222")
+
+
         source_id = 0
 
         #TODO: Add WellID to nmbgmr ST locations
         if self._config['agency'] == "nmbgmr":
             source_id = data['WellID']
         elif self._config['agency'] == "isc":
+            print ("@@@@@@@@@@@@@@@@@@2222")
             source_id = data['monitoring_point_id']
         elif self._config['agency'] == "pvacd":
             source_id = data['locationId']
@@ -226,7 +289,7 @@ class DestinationSensorthingsObservations(Destination):
         #elif self._config['agency'] == "cabq":
         #    source_id = data['site_id']
 
-
+        return source_id
 
 
     def check(self, logger: AirbyteLogger, config: Mapping[str, Any]) -> AirbyteConnectionStatus:

@@ -28,22 +28,22 @@ RAND_STRING_WITH_NAME_MSG3 = "".join(["LEWIS N DIVERSION_", rand_string])
 
 @pytest.fixture
 def config_isc():
-    return {"config": {"destination_path": "http://34.106.60.230:8080/FROST-Server/v1.1", "name": "ISC Seven Rivers Monitoring Points", "description": "ISC Seven Rivers Monitoring Point Locations", "agency": "ISC_SEVEN_RIVERS", "source_api": "https://nmisc-wf.gladata.com/api/", "observation_category": "levels" }}
+    return {"config": {"destination_path": "http://34.106.60.230:8080/FROST-Server/v1.1", "name": "ISC Seven Rivers Monitoring Points", "description": "ISC Seven Rivers Monitoring Point Locations", "agency": "isc", "source_api": "https://nmisc-wf.gladata.com/api/", "observation_category": "levels" }}
 
 
 @pytest.fixture
 def config_pecos():
-    return {"config": {"destination_path": "http://34.106.60.230:8080/FROST-Server/v1.1", "name": "Pecos Valley Locations", "description": "Pecos Valley Well Locations", "agency": "PVACD", "observation_category": "levels" }}
+    return {"config": {"destination_path": "http://34.106.60.230:8080/FROST-Server/v1.1", "name": "Pecos Valley Locations", "description": "Pecos Valley Well Locations", "agency": "pvacd", "observation_category": "levels" }}
 
 
 @pytest.fixture
 def config_nmbgmr():
-    return {"config": {"destination_path": "http://34.106.60.230:8080/FROST-Server/v1.1", "name": "NMBGMR Wells", "description": "NMBGMR Wells", "agency": "NMBGMR", "observation_category": "levels" }}
+    return {"config": {"destination_path": "http://34.106.60.230:8080/FROST-Server/v1.1", "name": "NMBGMR Wells", "description": "NMBGMR Wells", "agency": "nmbgmr", "observation_category": "levels" }}
 
 
 @pytest.fixture
 def config_ebid():
-    return {"config": {"destination_path": "http://34.106.60.230:8080/FROST-Server/v1.1", "name": "EBID Locations", "description": "EBID Locations", "agency": "EBID", "observation_category": "levels" }}
+    return {"config": {"destination_path": "http://34.106.60.230:8080/FROST-Server/v1.1", "name": "EBID Locations", "description": "EBID Locations", "agency": "ebid", "observation_category": "levels" }}
 
 
 @pytest.fixture
@@ -222,6 +222,10 @@ def test_write_isc(
 
     #generator = destination.write(config_unpacked, configured_catalog_isc, [airbyte_message1, airbyte_message2, airbyte_message3, airbyte_message4_for_patch, airbyte_message5_error_for_mult_loc_with_same_name])
     generator = destination.write(config_unpacked, configured_catalog_isc, [airbyte_message1])
+
+    results = list(generator)
+
+    assert len(results) == 1
 
     print ("\n isc test3")
     assert True
