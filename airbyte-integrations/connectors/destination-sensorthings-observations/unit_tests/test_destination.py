@@ -25,27 +25,30 @@ from destination_sensorthings_observations import DestinationSensorthingsObserva
 rand_string = ''.join(random.choices(string.ascii_lowercase + string.digits, k=10))
 RAND_STRING_WITH_NAME_MSG3 = "".join(["LEWIS N DIVERSION_", rand_string])
 
+FROST_SERVER = "http://34.106.85.93:8080/FROST-Server/v1.1"
+#FROST_SERVER = "http://34.106.60.230:8080/FROST-Server/v1.1"
 
 @pytest.fixture
 def config_isc():
-    return {"config": {"destination_path": "http://34.106.60.230:8080/FROST-Server/v1.1", "name": "ISC Seven Rivers Monitoring Points", "description": "ISC Seven Rivers Monitoring Point Locations", "agency": "isc", "source_api": "https://nmisc-wf.gladata.com/api/", "observation_category": "levels" }}
+    return {"config": {"destination_path": f"{FROST_SERVER}", "name": "ISC Seven Rivers Monitoring Points", "description": "ISC Seven Rivers Monitoring Point Locations", "agency": "isc", "source_api": "https://nmisc-wf.gladata.com/api/", "observation_category": "levels" }}
 
 
 @pytest.fixture
 def config_pecos():
-    return {"config": {"destination_path": "http://34.106.60.230:8080/FROST-Server/v1.1", "name": "Pecos Valley Locations", "description": "Pecos Valley Well Locations", "agency": "pvacd", "observation_category": "levels" }}
+    return {"config": {"destination_path": f"{FROST_SERVER}", "name": "Pecos Valley Locations", "description": "Pecos Valley Well Locations", "agency": "pvacd", "observation_category": "levels" }}
 
 
 @pytest.fixture
 def config_nmbgmr():
-    return {"config": {"destination_path": "http://34.106.60.230:8080/FROST-Server/v1.1", "name": "NMBGMR Wells", "description": "NMBGMR Wells", "agency": "nmbgmr", "observation_category": "levels" }}
+    return {"config": {"destination_path": f"{FROST_SERVER}", "name": "NMBGMR Wells", "description": "NMBGMR Wells", "agency": "nmbgmr", "observation_category": "levels" }}
 
 
 @pytest.fixture
 def config_ebid():
-    return {"config": {"destination_path": "http://34.106.60.230:8080/FROST-Server/v1.1", "name": "EBID Locations", "description": "EBID Locations", "agency": "ebid", "observation_category": "levels" }}
+    return {"config": {"destination_path": f"{FROST_SERVER}", "name": "EBID Locations", "description": "EBID Locations", "agency": "ebid", "observation_category": "levels" }}
 
 
+# id originally 180
 @pytest.fixture
 def airbyte_message1():
 
@@ -55,7 +58,7 @@ def airbyte_message1():
     return AirbyteMessage(
         type=Type.RECORD,
         record=AirbyteRecordMessage(
-            stream="isc_water_levels", data={"monitoring_point_id": "180", "dateTime": 1686881227,"depthToWaterFeet": 3289.0, "_airbyte_ab_id": "99407136-3e9f-421d-9894-86327cd99d87"}, emitted_at=int(datetime.now().timestamp()) * 1000
+            stream="isc_water_levels", data={"monitoring_point_id": "177", "dateTime": 1686881227,"depthToWaterFeet": 3289.0, "_airbyte_ab_id": "99407136-3e9f-421d-9894-86327cd99d87"}, emitted_at=int(datetime.now().timestamp()) * 1000
         ),
     )
 
@@ -230,6 +233,7 @@ def test_write_isc(
     print ("\n isc test3")
     assert True
     #assert False
+
 
 """
 def test_write_pecos(

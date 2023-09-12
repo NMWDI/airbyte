@@ -11,6 +11,7 @@ from airbyte_cdk.models import AirbyteConnectionStatus, AirbyteMessage, Configur
 
 
 import frost_sta_client as fsc
+#import frost_sta_client.model.ext.unitofmeasurement 
 
 
 from google.cloud import bigquery
@@ -172,8 +173,125 @@ class DestinationSensorthingsObservations(Destination):
         for record in result:
             print (record)
 
+            name = self._get_name_from_record(record)
+
+
+            print ('\n55555555555533333333333333================')
+            print (name)
+            name = name + "__dju0d39t0m"
+            print (name)
+            print ('\n55555555555533333333333333================')
+
+
+
         print (source_id)
         print ('\n4444444================')
+
+
+        # Query SensorThings for location name
+        locations = self._service.locations().query().filter(f"name eq '{name}'").list()
+        #location_props = self._make_location_properties(data)
+        #loc = self._make_location_location(data, name)
+
+        # Check length of list and log error if more than one location with the same name
+        if len(locations.entities) > 100000:
+        #if len(locations.entities) > 1:
+            print ('\n6666666663333333333================')
+            print ("Many LOC")
+            print ('\n666666666633333333333333================')
+
+            #Log error
+            logger.error(f"Multiple locations with the name [{name}] exist")
+           
+            # Need to grab a single location entity to return from method
+            for location in locations: 
+                #pass
+                print (location.name)
+
+
+        # Else if one location exists, check if datastream exists
+        #elif len(locations.entities) == 1:
+        elif len(locations.entities) >= 1:
+            print ('\n6666666663333333333================')
+            print ("ONE LOC")
+            print ('\n666666666633333333333333================')
+
+
+            for location in locations:
+                iotid = location.id
+               
+                datastream_url, thing = self._query_things_for_datastream_url(iotid)
+
+                print ('\n77777777776666666663333333333================')
+                print (datastream_url)
+                print (thing)
+                print ('\n777777777666666666633333333333333================')
+
+
+                # Check if datastream exists
+                if (self._query_for_datastream_existence(datastream_url)):
+                    # Add observations
+                    pass
+                else:
+                    # Create Datastream
+                    print ('\n111116666666663333333333================')
+                    print ("DS NOT EXIST")
+                    print ('\n111116666666663333333333================')
+
+
+                    unit_of_measurement_dict = {
+                        "name": "Foot",
+                        "symbol": "ft",
+                        "definition": "http://www.qudt.org/vocab/unit/FT"
+                    }
+
+
+                    unit_of_measurement_obj = fsc.UnitOfMeasurement(name="Foot",
+                                              symbol="ft",
+                                              definition="http://www.qudt.org/vocab/unit/FT")
+
+
+                    observed_property_obj = fsc.ObservedProperty(name="Depth to Water Below Ground Surface",
+                                            definition="No Definition",
+                                            description="depth to water below ground surface")
+
+
+
+                    sensor_obj = fsc.Sensor(name="NoSensor",
+                                            description="No Description",
+                                            encoding_type="application/pdf",
+                                            metadata="No Metadata")
+
+
+
+                    #TODO: Add phenomenon_time and result_time 
+                    datastream = fsc.Datastream(name="Groundwater Levels",
+                                            description='Measurement of groundwater depth in a water well, as measured below ground surface',
+                                            observation_type="http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
+                                            observed_area=location.location,
+                                            properties={"topic": "Water Quantity", "agency": self._config['agency']},
+                                            observed_property=observed_property_obj,
+                                            sensor=sensor_obj,
+                                            thing=thing,
+                                            unit_of_measurement=unit_of_measurement_obj)
+                    self._service.create(datastream)
+
+
+
+                break
+
+
+
+        # Else log error for no location existing
+        else:
+            print ('\n6666666663333333333================')
+            print ("No LOC")
+            print ('\n666666666633333333333333================')
+
+            #Log error
+            logger.error(f"No location exists with the name [{name}]")
+
+
 
         """
         # Check length of list and log error if more than one location with the same source_id
@@ -219,29 +337,92 @@ class DestinationSensorthingsObservations(Destination):
         """      
 
 
+
+    def _get_name_from_record(self, data):
+        name = ''
+        if self._config['agency'] == "nmbgmr":
+            name = data['PointID']
+        elif self._config['agency'] == "isc":
+            name = data['name']
+        elif self._config['agency'] == "pvacd":
+            name = data['name']
+        elif self._config['agency'] == "ebid":
+            name = data['site_id']
+        #TODO: add cabq and ose roswell basin
+        #elif self._config['agency'] == "cabq":
+        #    name = data['site_id']
+
+        return name
+
+
+
     def _query_things_for_datastream_url(self, iotid):
 
-        location_iotid = location.id
+        #location_iotid = location.id
 
-        location_thing_url = f'{self._service.url}/Locations({location_iotid})/Things'
+        #location_thing_url = f'{self._service.url}/Locations({location_iotid})/Things'
+        location_thing_url = f'{self._service.url}/Locations({iotid})/Things'
+
+       
+        print ('\n999996666666663333333333================')
+        print (location_thing_url)
+        print ('\n9999999666666666633333333333333================')
+
+
 
         r = requests.get(location_thing_url)
 
         #TODO: Add else or check for water well not found to return alt for datastream
         if r.status_code == 200:
+            print ('\n111999996666666663333333333================')
+            print ("200")
+            print ('\n11119999999666666666633333333333333================')
+
+            datastream_url = ""
+
             response_json = r.json()
 
             response_json_values = response_json["value"]
 
+            print ('\n44111999996666666663333333333================')
+            print (response_json_values)
+            print ('\n4411119999999666666666633333333333333================')
+
             water_well_thing_found = False
 
-            for thing in response_json_values:
-                if thing["name"] == "Water Well":
+            for thing_value in response_json_values:
+                if thing_value["name"] == "Water Well":
                     water_well_thing_found = True
+
+                    print ('\n0000099996666666663333333333================')
+                    print ("found water well")
+                    print ('\n000009999999666666666633333333333333================')
 
                     #thing_url = response_json_values[0]["@iot.selfLink"]
 
+                    thing_id = response_json_values[0]["@iot.id"]
+
                     datastream_url = response_json_values[0]["Datastreams@iot.navigationLink"]
+
+                    print (thing_id)
+
+
+                #locations = self._service.locations().query().filter(f"name eq '{name}'").list()
+                things_list = self._service.things().query().filter(f"id eq {thing_id}").list()
+
+                for thing in things_list:
+                    print ('\n777799996666666663333333333================')
+                    print (thing)
+                    print ('\n777799996666666663333333333================')
+                    pass 
+
+
+
+            return datastream_url, thing
+            #return datastream_url
+
+
+
 
 
     def _query_for_datastream_existence(self, datastream_url):
