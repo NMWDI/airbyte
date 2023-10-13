@@ -6,6 +6,11 @@ from datetime import datetime
 from typing import Any, Dict
 import random
 import string
+import json
+
+from google.cloud import bigquery
+from google.oauth2 import service_account
+import os
 
 from airbyte_cdk.models import (
     AirbyteMessage,
@@ -25,95 +30,49 @@ from destination_sensorthings_observations import DestinationSensorthingsObserva
 rand_string = ''.join(random.choices(string.ascii_lowercase + string.digits, k=10))
 RAND_STRING_WITH_NAME_MSG3 = "".join(["LEWIS N DIVERSION_", rand_string])
 
-FROST_SERVER = "http://34.106.85.93:8080/FROST-Server/v1.1"
-#FROST_SERVER = "http://34.106.60.230:8080/FROST-Server/v1.1"
+FROST_SERVER = "http://...8080/FROST-Server/v1.1"
+
+cwd = os.getcwd()
+
+cred_file = os.path.join(cwd, "secrets/bq_creds.json")
+
+service_account_info_dict = json.load(open(cred_file))
+
+service_account_info = json.dumps(service_account_info_dict)
+
 
 @pytest.fixture
 def config_isc():
-    return {"config": {"destination_path": f"{FROST_SERVER}", "name": "ISC Seven Rivers Monitoring Points", "description": "ISC Seven Rivers Monitoring Point Locations", "agency": "isc", "source_api": "https://nmisc-wf.gladata.com/api/", "observation_category": "levels" }}
+    return {"config": {"destination_path": f"{FROST_SERVER}", "bigquery_credentials": service_account_info, "name": "ISC Seven Rivers Monitoring Points", "description": "ISC Seven Rivers Monitoring Point Locations", "agency": "isc", "source_api": "https://nmisc-wf.gladata.com/api/", "observation_category": "levels" }}
 
 
 @pytest.fixture
 def config_pecos():
-    return {"config": {"destination_path": f"{FROST_SERVER}", "name": "Pecos Valley Locations", "description": "Pecos Valley Well Locations", "agency": "pvacd", "observation_category": "levels" }}
+    return {"config": {"destination_path": f"{FROST_SERVER}", "bigquery_credentials": service_account_info, "name": "Pecos Valley Locations", "description": "Pecos Valley Well Locations", "agency": "pvacd", "observation_category": "levels" }}
 
 
 @pytest.fixture
 def config_nmbgmr():
-    return {"config": {"destination_path": f"{FROST_SERVER}", "name": "NMBGMR Wells", "description": "NMBGMR Wells", "agency": "nmbgmr", "observation_category": "levels" }}
+    return {"config": {"destination_path": f"{FROST_SERVER}", "bigquery_credentials": service_account_info, "name": "NMBGMR Wells", "description": "NMBGMR Wells", "agency": "nmbgmr", "observation_category": "levels" }}
 
 
 @pytest.fixture
 def config_ebid():
-    return {"config": {"destination_path": f"{FROST_SERVER}", "name": "EBID Locations", "description": "EBID Locations", "agency": "ebid", "observation_category": "levels" }}
+    return {"config": {"destination_path": f"{FROST_SERVER}", "bigquery_credentials": service_account_info, "name": "EBID Locations", "description": "EBID Locations", "agency": "ebid", "observation_category": "levels" }}
 
 
-# id originally 180
 @pytest.fixture
 def airbyte_message1():
 
     rand_string = ''.join(random.choices(string.ascii_lowercase + string.digits, k=10))
     rand_string_with_name = "".join(["Yellow_", rand_string])
 
-    return AirbyteMessage(
-        type=Type.RECORD,
-        record=AirbyteRecordMessage(
-            stream="isc_water_levels", data={"monitoring_point_id": "177", "dateTime": 1686881227,"depthToWaterFeet": 3289.0, "_airbyte_ab_id": "99407136-3e9f-421d-9894-86327cd99d87"}, emitted_at=int(datetime.now().timestamp()) * 1000
-        ),
-    )
-
-    """
-    return AirbyteMessage(
-        type=Type.RECORD,
-        record=AirbyteRecordMessage(
-            stream="isc_water_levels", data={"monitoring_point_id": "180", "name": rand_string_with_name, "type": "Shallow GW", "comments": "", "latitude": "32.61627", "longitude": -104.38256, "groundSurfaceElevationFeet": 3289.0, "_airbyte_ab_id": "99407136-3e9f-421d-9894-86327cd99d87"}, emitted_at=int(datetime.now().timestamp()) * 1000
-        ),
-    """
-
-
-@pytest.fixture
-def airbyte_message2():
-    
-    rand_string = ''.join(random.choices(string.ascii_lowercase + string.digits, k=10))
-    rand_string_with_name = "".join(["BOR North Well_", rand_string])
+    dateTime = int(datetime.now().timestamp()) * 1000
 
     return AirbyteMessage(
         type=Type.RECORD,
         record=AirbyteRecordMessage(
-            stream="isc_seven_rivers_monitoring_points", data={"id": "148", "name": rand_string_with_name, "type": "Unknown", "comments": "", "latitude": "32.6", "longitude": -104.4, "groundSurfaceElevationFeet": None, "_airbyte_ab_id": "87aa5569996e4cad4da19af6c5a41ec6"}, emitted_at=int(datetime.now().timestamp()) * 1000
-        ),
-    )
-
-
-@pytest.fixture
-def airbyte_message3():
-    return AirbyteMessage(
-        type=Type.RECORD,
-        record=AirbyteRecordMessage(
-            stream="isc_seven_rivers_monitoring_points", data={"id": "228", "name": RAND_STRING_WITH_NAME_MSG3, "type": "Unknown", "comments": "", "latitude": "32.6", "longitude": -104.4, "groundSurfaceElevationFeet": None, "_airbyte_ab_id": "103f9bbb-c847-4f13-b87a-16a88ef77afc"}, emitted_at=int(datetime.now().timestamp()) * 1000
-        ),
-    )
-
-
-@pytest.fixture
-def airbyte_message4_for_patch():
-    return AirbyteMessage(
-        type=Type.RECORD,
-        record=AirbyteRecordMessage(
-            stream="isc_seven_rivers_monitoring_points", data={"id": "228", "name": RAND_STRING_WITH_NAME_MSG3, "type": "Unknown", "comments": "Updated groundSurfaceElevationFeet", "latitude": "32.6", "longitude": -104.4, "groundSurfaceElevationFeet": 352.8, "_airbyte_ab_id": "103f9bbb-c847-4f13-b87a-16a88ef77afc"}, emitted_at=int(datetime.now().timestamp()) * 1000
-        ),
-    )
-
-
-# The following test message should throw an error as intended because the NMWDI development 
-# FROST-Server currently has multiple locations with the name "Yellow".
-@pytest.fixture
-def airbyte_message5_error_for_mult_loc_with_same_name():
-
-    return AirbyteMessage(
-        type=Type.RECORD,
-        record=AirbyteRecordMessage(
-            stream="isc_seven_rivers_monitoring_points", data={"id": "180", "name": "Yellow", "type": "Shallow GW", "comments": "", "latitude": "32.61627", "longitude": -104.38256, "groundSurfaceElevationFeet": 3289.0, "_airbyte_ab_id": "99407136-3e9f-421d-9894-86327cd99d87"}, emitted_at=int(datetime.now().timestamp()) * 1000
+            stream="isc_water_levels", data={"monitoring_point_id": "177", "dateTime": dateTime,"depthToWaterFeet": 3289.1, "_airbyte_ab_id": "99407136-3e9f-421d-9894-86327cd99d87"}, emitted_at=int(datetime.now().timestamp()) * 1000
         ),
     )
 
@@ -122,11 +81,13 @@ def airbyte_message5_error_for_mult_loc_with_same_name():
 def airbyte_message6_pecos():
     rand_string = ''.join(random.choices(string.ascii_lowercase + string.digits, k=10))
     rand_string_with_name = "".join(["Transwestern Level_", rand_string])
+    
+    dateTime = int(datetime.now().timestamp())
 
     return AirbyteMessage(
         type=Type.RECORD,
         record=AirbyteRecordMessage(
-            stream="pecos_locations", data={"id": "228", "name": rand_string_with_name, "type": "Unknown", "comments": "", "latitude": "32.6", "longitude": -104.4, "use": "active_monitoring", "aquifer": "Permian Aquifer System", "aquifer_group": "Permian Aquifer System", "model_formation": "SanAndreas", "_airbyte_ab_id": "103f9bbb-c847-4f13-b87a-16a88ef77afc"}, emitted_at=int(datetime.now().timestamp()) * 1000
+            stream="pecos_readings", data={"locationId": "5525065881092096", "timestamp": dateTime, "value": 14.079, "_airbyte_ab_id": "99407136-3e9f-421d-9894-86327cd99d87"}, emitted_at=int(datetime.now().timestamp()) * 1000
         ),
     )
 
@@ -136,13 +97,30 @@ def airbyte_message7_nmbgmr():
     rand_string = ''.join(random.choices(string.ascii_lowercase + string.digits, k=10))
     rand_string_with_name = "".join(["BW-0505_", rand_string])
 
+    timestamp = int(datetime.now().timestamp())
+
+    dateTime = datetime.strftime(datetime.utcfromtimestamp(timestamp), '%Y-%m-%d %H:%M:%S UTC')
+
     return AirbyteMessage(
         type=Type.RECORD,
         record=AirbyteRecordMessage(
-            stream="pecos_locations", data={"id": "228", "PointID": rand_string_with_name, "type": "Unknown", "comments": "", "Easting": 406530.0, "Northing": 3951847.0, "Altitude": 6669.10986, "AltitudeAccuracy": None, "WellDepth": 765.0, "CasingDiameter": 0.5600, "HoleDepth": 765.0, "_airbyte_ab_id": "103f9bbb-c847-4f13-b87a-16a88ef77afc"}, emitted_at=int(datetime.now().timestamp()) * 1000
+            stream="nmbgmr_manual_gwl", data={"PointId": "PP-011", "DateTimeMeasured": dateTime, "DepthToWater": 66.0, "_airbyte_ab_id": "99407136-3e9f-421d-9894-86327cd99d87"}, emitted_at=int(datetime.now().timestamp()) * 1000
         ),
     )
 
+
+@pytest.fixture
+def airbyte_message8_ebid():
+
+    timestamp = int(datetime.now().timestamp())
+    dateTime = datetime.strftime(datetime.utcfromtimestamp(timestamp), '%Y-%m-%d %H:%M:%S')
+
+    return AirbyteMessage(
+        type=Type.RECORD,
+        record=AirbyteRecordMessage(
+            stream="GetSiteMetaData", data={"site_id": "211-0000-M26R", "data_time": dateTime, "data_value": 33.9, "_airbyte_ab_id": "99407136-3e9f-421d-9894-86327cd99d87"}, emitted_at=int(datetime.now().timestamp()) * 1000
+        ),
+    )
 
 
 @pytest.fixture(name="configured_catalog_isc")
@@ -154,14 +132,6 @@ def configured_catalog_fixture_isc() -> ConfiguredAirbyteCatalog:
         sync_mode=SyncMode.incremental,
         destination_sync_mode=DestinationSyncMode.append,
     )
-
-    #overwrite_stream = ConfiguredAirbyteStream(
-    #    stream=AirbyteStream(name="overwrite_stream", json_schema=stream_schema, supported_sync_modes=[SyncMode.incremental]),
-    #    sync_mode=SyncMode.incremental,
-    #    destination_sync_mode=DestinationSyncMode.overwrite,
-    #)
-
-    #return ConfiguredAirbyteCatalog(streams=[append_stream, overwrite_stream])
     
     return ConfiguredAirbyteCatalog(streams=[append_stream])
 
@@ -193,6 +163,19 @@ def configured_catalog_fixture_nmbgmr() -> ConfiguredAirbyteCatalog:
 
 
 
+@pytest.fixture(name="configured_catalog_ebid")
+def configured_catalog_fixture_ebid() -> ConfiguredAirbyteCatalog:
+    stream_schema = {"type": "object", "properties": {"site_id": {"type": "integer"}, "name": {"type": "string"}, "type": {"type": "string"}, "comments": {"type": "string"}, "latitude": {"type": "number"}, "longitude": {"type": "number"}, "_airbyte_ab_id": {"type": "string"}}}
+
+    append_stream = ConfiguredAirbyteStream(
+        stream=AirbyteStream(name="append_stream", json_schema=stream_schema, supported_sync_modes=[SyncMode.incremental]),
+        sync_mode=SyncMode.incremental,
+        destination_sync_mode=DestinationSyncMode.append,
+    )
+    
+    return ConfiguredAirbyteCatalog(streams=[append_stream])
+
+
 def test_check_connection(config_isc):
 
     destination = DestinationSensorthingsObservations()
@@ -209,33 +192,21 @@ def test_write_isc(
     request,
     configured_catalog_isc: ConfiguredAirbyteCatalog,
     airbyte_message1: AirbyteMessage,
-    #airbyte_message2: AirbyteMessage,
-    #airbyte_message3: AirbyteMessage,
-    #airbyte_message4_for_patch: AirbyteMessage,
-    #airbyte_message5_error_for_mult_loc_with_same_name: AirbyteMessage,
-    #airbyte_message6_pecos: AirbyteMessage,
 ):
-
-    print ("\n isc test")
 
     config_unpacked = config_isc['config']
 
     destination = DestinationSensorthingsObservations()
-    print ("\n isc test2")
 
-    #generator = destination.write(config_unpacked, configured_catalog_isc, [airbyte_message1, airbyte_message2, airbyte_message3, airbyte_message4_for_patch, airbyte_message5_error_for_mult_loc_with_same_name])
     generator = destination.write(config_unpacked, configured_catalog_isc, [airbyte_message1])
 
     results = list(generator)
 
     assert len(results) == 1
 
-    print ("\n isc test3")
     assert True
-    #assert False
 
 
-"""
 def test_write_pecos(
     config_pecos,
     request,
@@ -245,16 +216,17 @@ def test_write_pecos(
 
     config_unpacked = config_pecos['config']
 
-    destination = DestinationSensorthingsLocations()
+    destination = DestinationSensorthingsObservations()
 
     generator = destination.write(config_unpacked, configured_catalog_pecos, [airbyte_message6_pecos])
 
+    results = list(generator)
+
+    assert len(results) == 1
+
     assert True
-"""
 
 
-
-"""
 def test_write_nmbgmr(
     config_nmbgmr,
     request,
@@ -268,5 +240,28 @@ def test_write_nmbgmr(
 
     generator = destination.write(config_unpacked, configured_catalog_nmbgmr, [airbyte_message7_nmbgmr])
 
+    results = list(generator)
+
+    assert len(results) == 1
+
     assert True
-"""
+
+
+def test_write_ebid(
+    config_ebid,
+    request,
+    configured_catalog_ebid: ConfiguredAirbyteCatalog,
+    airbyte_message8_ebid: AirbyteMessage,
+):
+
+    config_unpacked = config_ebid['config']
+
+    destination = DestinationSensorthingsObservations()
+
+    generator = destination.write(config_unpacked, configured_catalog_ebid, [airbyte_message8_ebid])
+
+    results = list(generator)
+
+    assert len(results) == 1
+
+    assert True
