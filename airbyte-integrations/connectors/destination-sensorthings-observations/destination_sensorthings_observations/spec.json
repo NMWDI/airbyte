@@ -15,9 +15,14 @@
         "type": "string",
         "description": "URL path to SensorThings Observations endpoint"
       },
+      "agency": {
+        "type": "string",
+        "description": "Agency providing data"
+      },
       "bigquery_credentials": {
         "type": "string",
-        "description": "BigQuery Credentials"
+        "description": "BigQuery Credentials",
+        "airbyte_secret": true
       }
     }
   }
