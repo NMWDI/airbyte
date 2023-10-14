@@ -8,7 +8,7 @@
     "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "Destination Sensorthings Observations",
     "type": "object",
-    "required": ["destination_path", "bigquery_credentials"],
+    "required": ["destination_path", "agency", "bigquery_credentials"],
     "additionalProperties": false,
     "properties": {
       "destination_path": {
