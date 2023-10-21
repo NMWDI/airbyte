@@ -160,7 +160,7 @@ class DestinationSensorthingsObservations(Destination):
                 else:
                     # Create Datastream
                     # TODO: Add datastream for groundwater quality
-                    datastream = _make_groundwater_datastream()
+                    datastream = self._make_groundwater_datastream()
 
                 break
 
@@ -354,6 +354,10 @@ class DestinationSensorthingsObservations(Destination):
             source_id = data['PointId']
         elif self._config['agency'] == "isc":
             source_id = data['monitoring_point_id']
+            # In BigQuery, the montioring_point_id is currently a float.
+            # Therfore, it needs to be converted to an int and will then be converted
+            # to a string in the sql query.
+            source_id = int(source_id)
         elif self._config['agency'] == "pvacd":
             source_id = data['locationId']
         elif self._config['agency'] == "ebid":
