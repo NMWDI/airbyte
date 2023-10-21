@@ -160,7 +160,7 @@ class DestinationSensorthingsObservations(Destination):
                 else:
                     # Create Datastream
                     # TODO: Add datastream for groundwater quality
-                    datastream = self._make_groundwater_datastream()
+                    datastream = self._make_groundwater_datastream(location, thing)
 
                 break
 
@@ -175,7 +175,7 @@ class DestinationSensorthingsObservations(Destination):
             return self._make_empty_datastream(), False
 
 
-    def _make_groundwater_datastream(self):
+    def _make_groundwater_datastream(self, location, thing):
 
         unit_of_measurement_dict = {
             "name": "Foot",
