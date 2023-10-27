@@ -105,27 +105,38 @@ class DestinationSensorthingsObservations(Destination):
 
         result = job.result()
 
-        for record in result:
-            name = self._get_name_from_record(record)
+        if result.total_rows > 0:
+            try:
+                for record in result:
+                    name = self._get_name_from_record(record)
 
-            # Uncomment below block for unit testing on nmbgmr development frost server.
-            # Since multiple copies of the base names exist in ST on the frost server,
-            # the following random string additions single out one location.
-            #if self._config['agency'] == "nmbgmr":
-            #    name = name + "__6cddnvwp7j"
-            #elif self._config['agency'] == "isc":
-            #    name = name + "__dju0d39t0m"
-            #elif self._config['agency'] == "pvacd":
-            #    name = name + "__c28ogugvgv"
-            #elif self._config['agency'] == "ebid":
-            #    name = name + "__z60tzi8zrp"
+                    # Uncomment below block for unit testing on nmbgmr development frost server.
+                    # Since multiple copies of the base names exist in ST on the frost server,
+                    # the following random string additions single out one location.
+                    #if self._config['agency'] == "nmbgmr":
+                    #    name = name + "__6cddnvwp7j"
+                    #elif self._config['agency'] == "isc":
+                    #    name = name + "__dju0d39t0m"
+                    #elif self._config['agency'] == "pvacd":
+                    #    name = name + "__c28ogugvgv"
+                    #elif self._config['agency'] == "ebid":
+                    #    name = name + "__z60tzi8zrp"
 
 
-        # Query SensorThings for location name
-        locations = self._service.locations().query().filter(f"name eq '{name}'").list()
+                # Query SensorThings for location name
+                locations = self._service.locations().query().filter(f"name eq '{name}'").list()
+
+                location_exists = True
+
+            except:
+                location_exists = False
+                      
+        else:
+            location_exists = False
+
 
         # Check length of list and log error if more than one location with the same name
-        if len(locations.entities) > 1:
+        if location_exists and len(locations.entities) > 1:
 
             #Log error
             logger.error(f"Multiple locations with the name [{name}] exist")
@@ -137,7 +148,7 @@ class DestinationSensorthingsObservations(Destination):
             return self._make_empty_datastream(), False
 
         # Else if one location exists, check if datastream exists
-        elif len(locations.entities) == 1:
+        elif location_exists and len(locations.entities) == 1:
 
             for location in locations:
                 iotid = location.id
@@ -170,7 +181,11 @@ class DestinationSensorthingsObservations(Destination):
         # Else log error for no location existing
         else:
             #Log error
-            logger.error(f"No location exists with the name [{name}]")
+            try:
+                logger.error(f"No location exists with the name [{name}] corresponding to the record [{data}]")
+            except:
+                logger.error(f"No location exists corresponding to the record [{data}]")
+
 
             return self._make_empty_datastream(), False
 
@@ -234,8 +249,11 @@ class DestinationSensorthingsObservations(Destination):
         # Retrieve phenomenon_time
         if self._config['agency'] == "nmbgmr":
             date_time_str = data['DateTimeMeasured'].rstrip(' UTC')
- 
-            date_time = datetime.strptime(date_time_str, '%Y-%m-%d %H:%M:%S')
+
+            try:
+                date_time = datetime.strptime(date_time_str, '%Y-%m-%d %H:%M:%S')
+            except:
+                date_time = datetime.strptime(date_time_str, '%Y-%m-%dT%H:%M:%SZ')
 
             phenomenon_time = datetime.strftime(date_time, '%Y-%m-%dT%H:%M:%S.000Z')
 
@@ -259,26 +277,35 @@ class DestinationSensorthingsObservations(Destination):
         # Retrieve result
         if self._config['agency'] == "isc":
             result = data['depthToWaterFeet']
-        
+            parameters = None
+
         elif self._config['agency'] == "pvacd":
             result = data['value']
-       
+            parameters = None
+
         elif self._config['agency'] == "nmbgmr":
             result = data['DepthToWater']
+            parameters = {"level_status": data['LevelStatus']}
        
         elif self._config['agency'] == "ebid":
             result = data['data_value']
+            parameters = None
        
         #TODO: add cabq and ose roswell basin
         #elif self._config['agency'] == "cabq":
 
 
-        #TODO: Parameters is a required property but not currently on SensorThings
+        if type(result) == float or type(result) == int:
+            pass
+        else:
+            result = -99999.0
+
 
         observation = fsc.Observation(phenomenon_time=phenomenon_time,
                                 result=result,
                                 result_time=phenomenon_time,
-                                datastream=datastream)
+                                datastream=datastream,
+                                parameters=parameters)
 
         self._service.create(observation)
 
@@ -390,7 +417,6 @@ class DestinationSensorthingsObservations(Destination):
     def _query_things_for_datastream_url(self, iotid):
 
         location_thing_url = f'{self._service.url}/Locations({iotid})/Things'
-        #location_thing_url = f'{self._service.url}/Locations({iotid})/Things1'
 
         r = requests.get(location_thing_url)
 
