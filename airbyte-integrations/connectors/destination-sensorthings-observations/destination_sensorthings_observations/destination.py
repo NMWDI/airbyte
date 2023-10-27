@@ -378,7 +378,7 @@ class DestinationSensorthingsObservations(Destination):
         source_id = 0
 
         if self._config['agency'] == "nmbgmr":
-            source_id = data['PointId']
+            source_id = data['PointID']
         elif self._config['agency'] == "isc":
             source_id = data['monitoring_point_id']
             # In BigQuery, the montioring_point_id is currently a float.
