@@ -121,7 +121,7 @@ class DestinationSensorthingsObservations(Destination):
                     #    name = name + "__c28ogugvgv"
                     #elif self._config['agency'] == "ebid":
                     #    name = name + "__z60tzi8zrp"
-
+                    
 
                 # Query SensorThings for location name
                 locations = self._service.locations().query().filter(f"name eq '{name}'").list()
@@ -182,9 +182,9 @@ class DestinationSensorthingsObservations(Destination):
         else:
             #Log error
             try:
-                logger.error(f"No location exists with the name [{name}] corresponding to the record [{data}]")
+                logger.error(f"No location exists with the name [{name}] corresponding to the record: [{data}]")
             except:
-                logger.error(f"No location exists corresponding to the record [{data}]")
+                logger.error(f"No location exists corresponding to the record: [{data}]")
 
 
             return self._make_empty_datastream(), False
@@ -248,27 +248,61 @@ class DestinationSensorthingsObservations(Destination):
 
         # Retrieve phenomenon_time
         if self._config['agency'] == "nmbgmr":
-            date_time_str = data['DateTimeMeasured'].rstrip(' UTC')
-
             try:
-                date_time = datetime.strptime(date_time_str, '%Y-%m-%d %H:%M:%S')
+                date_time_str = data['DateTimeMeasured'].rstrip(' UTC')
+                time_found = True
             except:
-                date_time = datetime.strptime(date_time_str, '%Y-%m-%dT%H:%M:%SZ')
+                time_found = False
 
-            phenomenon_time = datetime.strftime(date_time, '%Y-%m-%dT%H:%M:%S.000Z')
+            if time_found:
+                try:
+                    date_time = datetime.strptime(date_time_str, '%Y-%m-%d %H:%M:%S')
+                except: 
+                    try:
+                        date_time = datetime.strptime(date_time_str, '%Y-%m-%dT%H:%M:%SZ')
+                    except:
+                        time_found = False
+
+            if time_found:
+                phenomenon_time = datetime.strftime(date_time, '%Y-%m-%dT%H:%M:%S.000Z')
+            else:
+                phenomenon_time = None
+
 
         elif self._config['agency'] == "isc":
-            phenomenon_time = datetime.strftime(datetime.utcfromtimestamp(data['dateTime']/1000), '%Y-%m-%dT%H:%M:%S.000Z')
+            try:
+                phenomenon_time = datetime.strftime(datetime.utcfromtimestamp(data['dateTime']/1000), '%Y-%m-%dT%H:%M:%S.000Z')
+                time_found = True
+
+            except:
+                phenomenon_time = None
+                time_found = False
+
 
         elif self._config['agency'] == "pvacd":
-            phenomenon_time = datetime.strftime(datetime.utcfromtimestamp(data['timestamp']), '%Y-%m-%dT%H:%M:%S.000Z')
-        
+            try:
+                phenomenon_time = datetime.strftime(datetime.utcfromtimestamp(data['timestamp']), '%Y-%m-%dT%H:%M:%S.000Z')
+                time_found = True
+
+            except:
+                phenomenon_time = None
+                time_found = False
+
+
         elif self._config['agency'] == "ebid":
-            date_time_str = data['data_time']            
+            try:
+                date_time_str = data['data_time']            
 
-            date_time = datetime.strptime(date_time_str, '%Y-%m-%d %H:%M:%S')
+                date_time = datetime.strptime(date_time_str, '%Y-%m-%d %H:%M:%S')
 
-            phenomenon_time = datetime.strftime(date_time, '%Y-%m-%dT%H:%M:%S.000Z')
+                phenomenon_time = datetime.strftime(date_time, '%Y-%m-%dT%H:%M:%S.000Z')
+
+                time_found = True
+
+            except:
+                phenomenon_time = None
+                time_found = False
+
 
         #TODO: add cabq and ose roswell basin
         #elif self._config['agency'] == "cabq":
@@ -307,7 +341,10 @@ class DestinationSensorthingsObservations(Destination):
                                 datastream=datastream,
                                 parameters=parameters)
 
-        self._service.create(observation)
+        if time_found:
+            self._service.create(observation)
+        else:
+            logger.error(f"No valid phenomenon time or result time found in the record: [{data}]")
 
         return observation
 

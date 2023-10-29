@@ -29,7 +29,7 @@ from destination_sensorthings_observations import DestinationSensorthingsObserva
 rand_string = ''.join(random.choices(string.ascii_lowercase + string.digits, k=10))
 RAND_STRING_WITH_NAME_MSG3 = "".join(["LEWIS N DIVERSION_", rand_string])
 
-# Enter frost server url below
+# Enter frost server url below. No slash at the end of url.
 #FROST_SERVER = "http://...8080/FROST-Server/v1.1"
 
 cwd = os.getcwd()
@@ -104,7 +104,7 @@ def airbyte_message7_nmbgmr():
     return AirbyteMessage(
         type=Type.RECORD,
         record=AirbyteRecordMessage(
-            stream="nmbgmr_manual_gwl", data={"PointId": "PP-011", "DateTimeMeasured": dateTime, "DepthToWater": 66.0, "LevelStatus": "Operating Well", "_airbyte_ab_id": "99407136-3e9f-421d-9894-86327cd99d87"}, emitted_at=int(datetime.now().timestamp()) * 1000
+            stream="nmbgmr_manual_gwl", data={"PointID": "PP-011", "DateTimeMeasured": dateTime, "DepthToWater": 66.0, "LevelStatus": "Operating Well", "_airbyte_ab_id": "99407136-3e9f-421d-9894-86327cd99d87"}, emitted_at=int(datetime.now().timestamp()) * 1000
         ),
     )
 
@@ -121,7 +121,7 @@ def airbyte_message9_nmbgmr_null_result():
     return AirbyteMessage(
         type=Type.RECORD,
         record=AirbyteRecordMessage(
-            stream="nmbgmr_manual_gwl", data={"PointId": "PP-011", "DateTimeMeasured": dateTime, "DepthToWater": None, "LevelStatus": "Well Dry", "_airbyte_ab_id": "99407136-3e9f-421d-9894-86327cd99d87"}, emitted_at=int(datetime.now().timestamp()) * 1000
+            stream="nmbgmr_manual_gwl", data={"PointID": "PP-011", "DateTimeMeasured": dateTime, "DepthToWater": None, "LevelStatus": "Well Dry", "_airbyte_ab_id": "99407136-3e9f-421d-9894-86327cd99d87"}, emitted_at=int(datetime.now().timestamp()) * 1000
         ),
     )
 
@@ -138,7 +138,24 @@ def airbyte_message10_nmbgmr_missing_location():
     return AirbyteMessage(
         type=Type.RECORD,
         record=AirbyteRecordMessage(
-            stream="nmbgmr_manual_gwl", data={"PointId": "aPP-011", "DateTimeMeasured": dateTime, "DepthToWater": 66.0, "LevelStatus": "Operating Well", "_airbyte_ab_id": "99407136-3e9f-421d-9894-86327cd99d87"}, emitted_at=int(datetime.now().timestamp()) * 1000
+            stream="nmbgmr_manual_gwl", data={"PointID": "aPP-011", "DateTimeMeasured": dateTime, "DepthToWater": 66.0, "LevelStatus": "Operating Well", "_airbyte_ab_id": "99407136-3e9f-421d-9894-86327cd99d87"}, emitted_at=int(datetime.now().timestamp()) * 1000
+        ),
+    )
+
+
+@pytest.fixture
+def airbyte_message11_nmbgmr_missing_datetime():
+    rand_string = ''.join(random.choices(string.ascii_lowercase + string.digits, k=10))
+    rand_string_with_name = "".join(["BW-0505_", rand_string])
+
+    timestamp = int(datetime.now().timestamp())
+
+    dateTime = datetime.strftime(datetime.utcfromtimestamp(timestamp), '%Y-%m-%d %H:%M:%S UTC')
+
+    return AirbyteMessage(
+        type=Type.RECORD,
+        record=AirbyteRecordMessage(
+            stream="nmbgmr_manual_gwl", data={"PointID": "PP-011", "DateTimeMeasured": None, "DepthToWater": 66.0, "LevelStatus": "Operating Well", "_airbyte_ab_id": "99407136-3e9f-421d-9894-86327cd99d87"}, emitted_at=int(datetime.now().timestamp()) * 1000
         ),
     )
 
@@ -267,17 +284,18 @@ def test_write_nmbgmr(
     airbyte_message7_nmbgmr: AirbyteMessage,
     airbyte_message9_nmbgmr_null_result: AirbyteMessage,
     airbyte_message10_nmbgmr_missing_location: AirbyteMessage,
+    airbyte_message11_nmbgmr_missing_datetime: AirbyteMessage,
 ):
 
     config_unpacked = config_nmbgmr['config']
 
     destination = DestinationSensorthingsObservations()
 
-    generator = destination.write(config_unpacked, configured_catalog_nmbgmr, [airbyte_message7_nmbgmr, airbyte_message9_nmbgmr_null_result, airbyte_message10_nmbgmr_missing_location])
+    generator = destination.write(config_unpacked, configured_catalog_nmbgmr, [airbyte_message7_nmbgmr, airbyte_message9_nmbgmr_null_result, airbyte_message10_nmbgmr_missing_location, airbyte_message11_nmbgmr_missing_datetime])
 
     results = list(generator)
 
-    assert len(results) == 3
+    assert len(results) == 4
 
     assert True
 
@@ -300,4 +318,3 @@ def test_write_ebid(
     assert len(results) == 1
 
     assert True
-
