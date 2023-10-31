@@ -162,6 +162,7 @@ class DestinationSensorthingsObservations(Destination):
                         return self._make_empty_datastream(), False
 
                 else:
+                    logger.error(f"Location [{name}] does not have a corresponding Thing")
                     return self._make_empty_datastream(), False
 
 
@@ -308,31 +309,72 @@ class DestinationSensorthingsObservations(Destination):
         #elif self._config['agency'] == "cabq":
 
 
-        # Retrieve result
-        if self._config['agency'] == "isc":
-            result = data['depthToWaterFeet']
-            parameters = None
+        # Query observations to grab the phenomenon time of the latest observation
+        r = requests.get(datastream_observation_url)
 
-        elif self._config['agency'] == "pvacd":
-            result = data['value']
-            parameters = None
+        if r.status_code == 200:
+            try:
+                response_json = r.json()
 
-        elif self._config['agency'] == "nmbgmr":
-            result = data['DepthToWater']
-            parameters = {"level_status": data['LevelStatus']}
-       
-        elif self._config['agency'] == "ebid":
-            result = data['data_value']
-            parameters = None
-       
-        #TODO: add cabq and ose roswell basin
-        #elif self._config['agency'] == "cabq":
+                response_json_values = response_json["value"]
+
+                last_obs_time_str = response_json_values[0]["phenomenonTime"]
+
+                last_obs_time = datetime.strptime(last_obs_time_str, '%Y-%m-%dT%H:%M:%S.000Z')
+
+                latest_observation_found = True
+
+            except:
+                latest_observation_found = False
 
 
-        if type(result) == float or type(result) == int:
-            pass
+            if time_found and latest_observation_found:
+                
+                phenomenon_time_datetime = datetime.strptime(phenomenon_time, '%Y-%m-%dT%H:%M:%S.000Z')
+
+                if phenomenon_time_datetime > last_obs_time:
+                    observation_is_new = True
+                else:
+                    observation_is_new = False
+
+            else:
+                observation_is_new = True
+
+        else:
+            observation_is_new = True
+
+
+        if time_found and observation_is_new:
+
+            # Retrieve result
+            if self._config['agency'] == "isc":
+                result = data['depthToWaterFeet']
+                parameters = None
+
+            elif self._config['agency'] == "pvacd":
+                result = data['value']
+                parameters = None
+
+            elif self._config['agency'] == "nmbgmr":
+                result = data['DepthToWater']
+                parameters = {"level_status": data['LevelStatus']}
+           
+            elif self._config['agency'] == "ebid":
+                result = data['data_value']
+                parameters = None
+           
+            #TODO: add cabq and ose roswell basin
+            #elif self._config['agency'] == "cabq":
+
+
+            if type(result) == float or type(result) == int:
+                pass
+            else:
+                result = -99999.0
+
         else:
             result = -99999.0
+            parameters = None
 
 
         observation = fsc.Observation(phenomenon_time=phenomenon_time,
@@ -341,8 +383,15 @@ class DestinationSensorthingsObservations(Destination):
                                 datastream=datastream,
                                 parameters=parameters)
 
-        if time_found:
+        
+        # If time found and observation is new, post to SensorThings
+        if time_found and observation_is_new:
             self._service.create(observation)
+
+        # If observation is not new, do not post to SensorThings
+        elif time_found and not observation_is_new:
+            pass
+
         else:
             logger.error(f"No valid phenomenon time or result time found in the record: [{data}]")
 
@@ -465,6 +514,8 @@ class DestinationSensorthingsObservations(Destination):
             response_json_values = response_json["value"]
 
             water_well_thing_found = False
+
+            thing = None
 
             for thing_value in response_json_values:
                 if thing_value["name"] == "Water Well":

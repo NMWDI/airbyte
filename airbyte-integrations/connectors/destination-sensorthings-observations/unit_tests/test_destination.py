@@ -6,6 +6,7 @@ from typing import Any, Dict
 import random
 import string
 import json
+import time
 
 from google.cloud import bigquery
 from google.oauth2 import service_account
@@ -114,6 +115,8 @@ def airbyte_message9_nmbgmr_null_result():
     rand_string = ''.join(random.choices(string.ascii_lowercase + string.digits, k=10))
     rand_string_with_name = "".join(["BW-0505_", rand_string])
 
+    # Sleep 2 seconds in order to ensure a different time for this message
+    time.sleep(2)
     timestamp = int(datetime.now().timestamp())
 
     dateTime = datetime.strftime(datetime.utcfromtimestamp(timestamp), '%Y-%m-%d %H:%M:%S UTC')
@@ -131,6 +134,8 @@ def airbyte_message10_nmbgmr_missing_location():
     rand_string = ''.join(random.choices(string.ascii_lowercase + string.digits, k=10))
     rand_string_with_name = "".join(["BW-0505_", rand_string])
 
+    # Sleep 2 seconds in order to ensure a different time for this message
+    time.sleep(2)
     timestamp = int(datetime.now().timestamp())
 
     dateTime = datetime.strftime(datetime.utcfromtimestamp(timestamp), '%Y-%m-%d %H:%M:%S UTC')
@@ -318,3 +323,4 @@ def test_write_ebid(
     assert len(results) == 1
 
     assert True
+
