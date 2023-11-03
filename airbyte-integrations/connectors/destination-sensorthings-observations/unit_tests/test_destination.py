@@ -41,6 +41,7 @@ service_account_info_dict = json.load(open(cred_file))
 
 service_account_info = json.dumps(service_account_info_dict)
 
+global_timestamp = int(datetime.now().timestamp())
 
 @pytest.fixture
 def config_isc():
@@ -98,9 +99,15 @@ def airbyte_message7_nmbgmr():
     rand_string = ''.join(random.choices(string.ascii_lowercase + string.digits, k=10))
     rand_string_with_name = "".join(["BW-0505_", rand_string])
 
+    # Sleep 2 seconds in order to ensure a different time for this message
+    time.sleep(2)
     timestamp = int(datetime.now().timestamp())
 
     dateTime = datetime.strftime(datetime.utcfromtimestamp(timestamp), '%Y-%m-%d %H:%M:%S UTC')
+
+    print ("\n------------------------------------")
+    print ("Two of the NMBGMR tests should give errors due to no location and no phenomenon time.")
+    print ("------------------------------------\n")
 
     return AirbyteMessage(
         type=Type.RECORD,
@@ -161,6 +168,40 @@ def airbyte_message11_nmbgmr_missing_datetime():
         type=Type.RECORD,
         record=AirbyteRecordMessage(
             stream="nmbgmr_manual_gwl", data={"PointID": "PP-011", "DateTimeMeasured": None, "DepthToWater": 66.0, "LevelStatus": "Operating Well", "_airbyte_ab_id": "99407136-3e9f-421d-9894-86327cd99d87"}, emitted_at=int(datetime.now().timestamp()) * 1000
+        ),
+    )
+
+
+@pytest.fixture
+def airbyte_message12_nmbgmr():
+    rand_string = ''.join(random.choices(string.ascii_lowercase + string.digits, k=10))
+    rand_string_with_name = "".join(["BW-0505_", rand_string])
+
+    # Sleep 2 seconds in order to ensure a different time for this message
+    time.sleep(2)
+    timestamp = int(datetime.now().timestamp())
+
+    dateTime = datetime.strftime(datetime.utcfromtimestamp(timestamp), '%Y-%m-%d %H:%M:%S UTC')
+
+    return AirbyteMessage(
+        type=Type.RECORD,
+        record=AirbyteRecordMessage(
+            stream="nmbgmr_manual_gwl", data={"PointID": "PP-011", "DateTimeMeasured": dateTime, "DepthToWater": 100.0, "LevelStatus": "Well Dry", "_airbyte_ab_id": "99407136-3e9f-421d-9894-86327cd99d87"}, emitted_at=int(datetime.now().timestamp()) * 1000
+        ),
+    )
+
+
+@pytest.fixture
+def airbyte_message13_nmbgmr():
+    rand_string = ''.join(random.choices(string.ascii_lowercase + string.digits, k=10))
+    rand_string_with_name = "".join(["BW-0505_", rand_string])
+
+    dateTime = datetime.strftime(datetime.utcfromtimestamp(global_timestamp), '%Y-%m-%d %H:%M:%S UTC')
+
+    return AirbyteMessage(
+        type=Type.RECORD,
+        record=AirbyteRecordMessage(
+            stream="nmbgmr_manual_gwl", data={"PointID": "PP-011", "DateTimeMeasured": dateTime, "DepthToWater": 200.0, "LevelStatus": "Well Dry", "_airbyte_ab_id": "99407136-3e9f-421d-9894-86327cd99d87"}, emitted_at=int(datetime.now().timestamp()) * 1000
         ),
     )
 
@@ -290,17 +331,19 @@ def test_write_nmbgmr(
     airbyte_message9_nmbgmr_null_result: AirbyteMessage,
     airbyte_message10_nmbgmr_missing_location: AirbyteMessage,
     airbyte_message11_nmbgmr_missing_datetime: AirbyteMessage,
+    airbyte_message12_nmbgmr: AirbyteMessage,
+    airbyte_message13_nmbgmr: AirbyteMessage
 ):
 
     config_unpacked = config_nmbgmr['config']
 
     destination = DestinationSensorthingsObservations()
 
-    generator = destination.write(config_unpacked, configured_catalog_nmbgmr, [airbyte_message7_nmbgmr, airbyte_message9_nmbgmr_null_result, airbyte_message10_nmbgmr_missing_location, airbyte_message11_nmbgmr_missing_datetime])
+    generator = destination.write(config_unpacked, configured_catalog_nmbgmr, [airbyte_message7_nmbgmr, airbyte_message9_nmbgmr_null_result, airbyte_message10_nmbgmr_missing_location, airbyte_message11_nmbgmr_missing_datetime, airbyte_message12_nmbgmr, airbyte_message13_nmbgmr])
 
     results = list(generator)
 
-    assert len(results) == 4
+    assert len(results) == 6
 
     assert True
 
@@ -323,4 +366,3 @@ def test_write_ebid(
     assert len(results) == 1
 
     assert True
-

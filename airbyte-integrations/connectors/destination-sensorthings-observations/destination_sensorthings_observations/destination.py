@@ -17,6 +17,7 @@ import requests
 from datetime import datetime
 import copy
 import logging
+import pandas as pd
 
 logger = logging.getLogger("airbyte")
 
@@ -44,7 +45,8 @@ class DestinationSensorthingsObservations(Destination):
         self._config = config
         self._service = fsc.SensorThingsService(config["destination_path"])
         self._validation_service = "https://nmwdistvalidation-dot-waterdatainitiative-271000.appspot.com/"
-            
+        self._obs_df = pd.DataFrame()
+
         #logger.info(f'========================')
 
         bigquery_credentials = json.loads(config["bigquery_credentials"])
@@ -68,9 +70,9 @@ class DestinationSensorthingsObservations(Destination):
 
                 stream = message.record.stream
 
-                datastream, new_datastream_created = self._make_datastream(data)
+                datastream, datastream_exists = self._make_datastream(data)
 
-                if new_datastream_created:
+                if datastream_exists:
                     self._validate_datastream(datastream)
 
                     observation = self._make_observation(datastream, data)
@@ -92,6 +94,9 @@ class DestinationSensorthingsObservations(Destination):
                 #logger.info(f'========================')
 
                 yield message
+
+        self._post_observations()
+
 
 
     def _make_datastream(self, data):
@@ -308,6 +313,9 @@ class DestinationSensorthingsObservations(Destination):
         #TODO: add cabq and ose roswell basin
         #elif self._config['agency'] == "cabq":
 
+        if time_found:
+            phenomenon_time_datetime = datetime.strptime(phenomenon_time, '%Y-%m-%dT%H:%M:%S.000Z')
+
 
         # Query observations to grab the phenomenon time of the latest observation
         r = requests.get(datastream_observation_url)
@@ -329,8 +337,6 @@ class DestinationSensorthingsObservations(Destination):
 
 
             if time_found and latest_observation_found:
-                
-                phenomenon_time_datetime = datetime.strptime(phenomenon_time, '%Y-%m-%dT%H:%M:%S.000Z')
 
                 if phenomenon_time_datetime > last_obs_time:
                     observation_is_new = True
@@ -386,7 +392,8 @@ class DestinationSensorthingsObservations(Destination):
         
         # If time found and observation is new, post to SensorThings
         if time_found and observation_is_new:
-            self._service.create(observation)
+            self._add_observation_to_dataframe(observation, datastream.id, phenomenon_time_datetime)
+
 
         # If observation is not new, do not post to SensorThings
         elif time_found and not observation_is_new:
@@ -396,6 +403,23 @@ class DestinationSensorthingsObservations(Destination):
             logger.error(f"No valid phenomenon time or result time found in the record: [{data}]")
 
         return observation
+
+
+    def _add_observation_to_dataframe(self, observation, datastream_id, phenomenon_time_datetime):
+
+        new_row_df = pd.DataFrame({"datastream_id": datastream_id, "date_time": phenomenon_time_datetime, "observation": observation}, index=[0])
+
+        self._obs_df = pd.concat([self._obs_df, new_row_df], ignore_index=True)
+
+
+    def _post_observations(self):
+        
+        self._obs_df = self._obs_df.set_index(['datastream_id', 'date_time'])
+
+        self._obs_df = self._obs_df.sort_index()
+
+        for index, row in self._obs_df.iterrows():
+            self._service.create(row["observation"])
 
 
     def _validate_datastream(self, datastream):

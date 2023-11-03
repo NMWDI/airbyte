@@ -9,7 +9,8 @@ MAIN_REQUIREMENTS = [
     "airbyte-cdk",
     "frost_sta_client",
     "google-cloud",
-    "google.cloud.bigquery"
+    "google.cloud.bigquery",
+    "pandas"
 ]
 
 TEST_REQUIREMENTS = [
