@@ -33,6 +33,7 @@ RAND_STRING_WITH_NAME_MSG3 = "".join(["LEWIS N DIVERSION_", rand_string])
 # Enter frost server url below. No slash at the end of url.
 #FROST_SERVER = "http://...8080/FROST-Server/v1.1"
 
+
 cwd = os.getcwd()
 
 cred_file = os.path.join(cwd, "secrets/bq_creds.json")

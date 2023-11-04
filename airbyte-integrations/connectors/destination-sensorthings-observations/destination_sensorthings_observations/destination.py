@@ -45,7 +45,12 @@ class DestinationSensorthingsObservations(Destination):
         self._config = config
         self._service = fsc.SensorThingsService(config["destination_path"])
         self._validation_service = "https://nmwdistvalidation-dot-waterdatainitiative-271000.appspot.com/"
+
+        self._source_id_to_datastream_dict = {}
+        self._datastream_id_to_last_obs_time_dict = {}
+
         self._obs_df = pd.DataFrame()
+
 
         #logger.info(f'========================')
 
@@ -70,11 +75,9 @@ class DestinationSensorthingsObservations(Destination):
 
                 stream = message.record.stream
 
-                datastream, datastream_exists = self._make_datastream(data)
+                datastream, datastream_exists = self._get_datastream(data)
 
                 if datastream_exists:
-                    self._validate_datastream(datastream)
-
                     observation = self._make_observation(datastream, data)
                 
                     #self._validate_observation(observation)
@@ -95,13 +98,33 @@ class DestinationSensorthingsObservations(Destination):
 
                 yield message
 
+
+        # All BigQuery records are iterated over before posting observations
         self._post_observations()
 
 
-
-    def _make_datastream(self, data):
+    def _get_datastream(self, data):
         # Get source_id from record
-        source_id= self._get_source_id_from_record(data)
+        source_id = self._get_source_id_from_record(data)
+
+        if source_id in self._source_id_to_datastream_dict:
+            datastream_tuple = self._source_id_to_datastream_dict[source_id] 
+
+            # Returns datastream and datastream_exists
+            return datastream_tuple[0], datastream_tuple[1]
+
+        else:
+            datastream, datastream_exists = self._make_datastream(data, source_id)
+
+            self._source_id_to_datastream_dict[source_id] = (datastream, datastream_exists) 
+
+            if datastream_exists:
+                self._validate_datastream(datastream)
+
+            return datastream, datastream_exists
+
+
+    def _make_datastream(self, data, source_id):
 
         # Get sql query for agency's locations table in BigQuery for the source_id
         sql = self._get_bq_sql_query(source_id)     
@@ -227,6 +250,7 @@ class DestinationSensorthingsObservations(Destination):
                                 sensor=sensor_obj,
                                 thing=thing,
                                 unit_of_measurement=unit_of_measurement_obj)
+
         self._service.create(datastream)
 
         return datastream
@@ -313,38 +337,49 @@ class DestinationSensorthingsObservations(Destination):
         #TODO: add cabq and ose roswell basin
         #elif self._config['agency'] == "cabq":
 
+
         if time_found:
             phenomenon_time_datetime = datetime.strptime(phenomenon_time, '%Y-%m-%dT%H:%M:%S.000Z')
 
 
-        # Query observations to grab the phenomenon time of the latest observation
-        r = requests.get(datastream_observation_url)
+        if datastream_iotid in self._datastream_id_to_last_obs_time_dict:
+            last_obs_time = self._datastream_id_to_last_obs_time_dict[datastream_iotid]
 
-        if r.status_code == 200:
-            try:
-                response_json = r.json()
+            latest_observation_found = True
 
-                response_json_values = response_json["value"]
+        else:
+            # Query observations to grab the phenomenon time of the latest observation
+            r = requests.get(datastream_observation_url)
 
-                last_obs_time_str = response_json_values[0]["phenomenonTime"]
+            if r.status_code == 200:
+                try:
+                    response_json = r.json()
 
-                last_obs_time = datetime.strptime(last_obs_time_str, '%Y-%m-%dT%H:%M:%S.000Z')
+                    response_json_values = response_json["value"]
 
-                latest_observation_found = True
+                    last_obs_time_str = response_json_values[0]["phenomenonTime"]
 
-            except:
-                latest_observation_found = False
+                    last_obs_time = datetime.strptime(last_obs_time_str, '%Y-%m-%dT%H:%M:%S.000Z')
 
+                    latest_observation_found = True
 
-            if time_found and latest_observation_found:
+                    # Add datastream_iotid and last_obs_time to dict
+                    self._datastream_id_to_last_obs_time_dict[datastream_iotid] = last_obs_time
 
-                if phenomenon_time_datetime > last_obs_time:
-                    observation_is_new = True
-                else:
-                    observation_is_new = False
+                except:
+                    latest_observation_found = False
 
             else:
+                latest_observation_found = False
                 observation_is_new = True
+
+
+        if time_found and latest_observation_found:
+
+            if phenomenon_time_datetime > last_obs_time:
+                observation_is_new = True
+            else:
+                observation_is_new = False
 
         else:
             observation_is_new = True
@@ -390,12 +425,11 @@ class DestinationSensorthingsObservations(Destination):
                                 parameters=parameters)
 
         
-        # If time found and observation is new, post to SensorThings
+        # If time found and observation is new, add to dataframe to later post to SensorThings
         if time_found and observation_is_new:
             self._add_observation_to_dataframe(observation, datastream.id, phenomenon_time_datetime)
 
-
-        # If observation is not new, do not post to SensorThings
+        # If observation is not new, do not add to dataframe
         elif time_found and not observation_is_new:
             pass
 
