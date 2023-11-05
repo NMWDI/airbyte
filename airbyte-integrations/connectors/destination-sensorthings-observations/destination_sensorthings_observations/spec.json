@@ -13,15 +13,15 @@
     "properties": {
       "destination_path": {
         "type": "string",
-        "description": "URL path to SensorThings Observations endpoint"
+        "description": "URL path to SensorThings Observations endpoint. Example: http://.../FROST-Server/v1.1"
       },
       "agency": {
         "type": "string",
-        "description": "Agency providing data"
+        "description": "Agency providing data. Example: nmbgmr, ebid, pvacd, isc"
       },
       "bigquery_credentials": {
         "type": "string",
-        "description": "BigQuery Credentials",
+        "description": "BigQuery Credentials. Paste full JSON key with type, project_id, private_key_id, etc",
         "airbyte_secret": true
       }
     }
