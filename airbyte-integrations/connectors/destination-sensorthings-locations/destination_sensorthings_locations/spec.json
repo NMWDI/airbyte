@@ -8,12 +8,12 @@
     "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "Destination Sensorthings Locations",
     "type": "object",
-    "required": ["destination_path", "agency", "observation_category"],
+    "required": ["destination_path", "agency"],
     "additionalProperties": false,
     "properties": {
       "destination_path": {
         "type": "string",
-        "description": "URL path to SensorThings locations endpoint"
+        "description": "URL path to SensorThings locations endpoint. Example: http://.../FROST-Server/v1.1"
       },
       "agency": {
         "type": "string",
