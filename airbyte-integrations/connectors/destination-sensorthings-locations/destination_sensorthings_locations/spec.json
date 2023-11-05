@@ -17,11 +17,7 @@
       },
       "agency": {
         "type": "string",
-        "description": "Agency providing data"
-      },
-      "observation_category": {
-        "type": "string",
-        "description": "Category of observation"
+        "description": "Agency providing data. Example: nmbgmr, ebid, pvacd, isc"
       }
     }
   }
