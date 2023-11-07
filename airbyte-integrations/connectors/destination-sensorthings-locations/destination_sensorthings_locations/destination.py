@@ -376,7 +376,7 @@ class DestinationSensorthingsLocations(Destination):
             if data['CasingDiameter'] != None:
                 thing_props['casing'] = {"diameter": self._feet_to_meters(data['CasingDiameter']), "units": "meters"} 
             else:
-                thing_props['casing'] = {"value": -1, "units": "meters"}
+                thing_props['casing'] = {"diameter": -1, "units": "meters"}
                
             if "AquiferType" in data and data['AquiferType'] != None:
                 thing_props['aquifer'] = data['AquiferType'].replace(",","").replace(" ","_").lower()
