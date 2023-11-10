@@ -100,7 +100,8 @@ class DestinationSensorthingsObservations(Destination):
 
 
         # All BigQuery records are iterated over before posting observations
-        self._post_observations()
+        if not self._obs_df.empty:
+            self._post_observations()
 
 
     def _get_datastream(self, data):
