@@ -44,6 +44,7 @@ service_account_info = json.dumps(service_account_info_dict)
 
 global_timestamp = int(datetime.now().timestamp())
 
+
 @pytest.fixture
 def config_isc():
     return {"config": {"destination_path": f"{FROST_SERVER}", "bigquery_credentials": service_account_info, "name": "ISC Seven Rivers Monitoring Points", "description": "ISC Seven Rivers Monitoring Point Locations", "agency": "isc", "source_api": "https://nmisc-wf.gladata.com/api/", "observation_category": "levels" }}

@@ -275,7 +275,7 @@ class DestinationSensorthingsObservations(Destination):
 
         datastream_iotid = datastream.id
 
-        datastream_observation_url = f'{self._service.url}/Datastreams({datastream_iotid})/Observations'
+        datastream_observation_url = f'{self._service.url}/Datastreams({datastream_iotid})/Observations?$orderby=id+desc'
 
         # Retrieve phenomenon_time
         if self._config['agency'] == "nmbgmr":
