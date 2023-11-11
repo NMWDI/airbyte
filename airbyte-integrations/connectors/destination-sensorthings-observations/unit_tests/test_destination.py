@@ -36,6 +36,8 @@ RAND_STRING_WITH_NAME_MSG3 = "".join(["LEWIS N DIVERSION_", rand_string])
 
 cwd = os.getcwd()
 
+# The BQ creds are added to a local secrets dir, which is automatically igored and
+# not committed by git
 cred_file = os.path.join(cwd, "secrets/bq_creds.json")
 
 service_account_info_dict = json.load(open(cred_file))

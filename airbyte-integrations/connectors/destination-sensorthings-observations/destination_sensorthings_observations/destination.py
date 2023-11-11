@@ -40,6 +40,25 @@ class DestinationSensorthingsObservations(Destination):
                                     destination
         :param input_messages: The stream of input messages received from the source
         :return: Iterable of AirbyteStateMessages wrapped in AirbyteMessage structs
+        -------------------------------------------------------------------
+        -------------------------------------------------------------------
+        -------------------------------------------------------------------
+        -------------------------------------------------------------------
+        -------------------------------------------------------------------
+        -------------------------------------------------------------------
+
+        This program retrieves and cycles through records delivered from BigQuery. It creates
+        a Datastream in the SensorThings destination associated with the corresponding Location and Thing if
+        the Datastream does not already exist. It then adds Observations to the corresponding Datastream
+        in SensorThings. The date-time of the observation time in the record is compared to the latest
+        Observation date-time existing in the corresponding Datastream in SensorThings and is only posted
+        if the date-time in the record is newer.
+
+        For unit testing, there is a block of string additions to location names that need to be uncommented
+        starting at line 167. The current FROST Server with endpoint 8080 has those locations with the random
+        strings added to the end as unique locations in SensorThings that the observations unit tests can 
+        run in association with.
+
         """
 
         self._config = config
@@ -79,7 +98,10 @@ class DestinationSensorthingsObservations(Destination):
 
                 if datastream_exists:
                     observation = self._make_observation(datastream, data)
-                
+
+                    # Validation service for observations is not currently active.
+                    # If this function is to be used, the call to it would need to be moved
+                    # to _post_observations() function because they are not posted until that function.
                     #self._validate_observation(observation)
 
                 yield message
@@ -440,6 +462,9 @@ class DestinationSensorthingsObservations(Destination):
         return observation
 
 
+    # Since records retrieved from BigQuery are not order by date-time, they need to be added to
+    # a dataframe one at a time and then sorted in the _post_observations function before they 
+    # are posted to SensorThings.
     def _add_observation_to_dataframe(self, observation, datastream_id, phenomenon_time_datetime):
 
         new_row_df = pd.DataFrame({"datastream_id": datastream_id, "date_time": phenomenon_time_datetime, "observation": observation}, index=[0])
@@ -448,11 +473,15 @@ class DestinationSensorthingsObservations(Destination):
 
 
     def _post_observations(self):
-        
+       
+        # Set a multi-index with datastream_id as the primary index and 
+        # date_time as the seconddary index.
         self._obs_df = self._obs_df.set_index(['datastream_id', 'date_time'])
 
+        # Sort by the primary and secondary indices
         self._obs_df = self._obs_df.sort_index()
 
+        # Cycle through all of the rows and post each observation to SensorThings
         for index, row in self._obs_df.iterrows():
             self._service.create(row["observation"])
 
