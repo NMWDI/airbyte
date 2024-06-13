@@ -309,7 +309,7 @@ class Readings(HydroVuStream):
     """
 
     # Required
-    # primary_key = 'id'
+    primary_key = 'id'
     # cursor_field = "latest_timestamp_for_each_location"
 
     def __init__(self, auth, *args, **kw):
@@ -530,7 +530,7 @@ class Readings(HydroVuStream):
                     flat_reading['timestamp'] = timestamp
                     flat_reading['time_utc_iso'] = time_utc_iso
                     flat_reading['value'] = value
-
+                    flat_reading['id'] = f"{locationId}_{parameterId}_{unitId}_{timestamp}"
                     flat_readings_list.append(flat_reading)
 
         # Sets to latest timestamp to save to state
