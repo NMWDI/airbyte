@@ -164,7 +164,7 @@ class Units(HydroVuStream):
     """
 
     # Required
-    primary_key = "id"
+    primary_key = "unitCode"
 
     def __init__(self, *args, **kw):
         super(Units, self).__init__(*args, **kw)
