@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Airbyte, Inc., all rights reserved.
+ * Copyright (c) 2023 Airbyte, Inc., all rights reserved.
  */
 
 package io.airbyte.integrations.destination.iceberg;
@@ -12,10 +12,10 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.dockerjava.api.model.ContainerNetwork;
+import io.airbyte.cdk.integrations.base.JavaBaseConstants;
+import io.airbyte.cdk.integrations.destination.NamingConventionTransformer;
+import io.airbyte.cdk.integrations.destination.StandardNameTransformer;
 import io.airbyte.commons.json.Jsons;
-import io.airbyte.integrations.base.JavaBaseConstants;
-import io.airbyte.integrations.destination.NamingConventionTransformer;
-import io.airbyte.integrations.destination.StandardNameTransformer;
 import io.airbyte.integrations.destination.iceberg.config.catalog.IcebergCatalogConfig;
 import io.airbyte.integrations.destination.iceberg.config.catalog.IcebergCatalogConfigFactory;
 import io.airbyte.integrations.destination.iceberg.config.storage.S3Config;

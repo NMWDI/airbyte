@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2022 Airbyte, Inc., all rights reserved.
+# Copyright (c) 2023 Airbyte, Inc., all rights reserved.
 #
 
 from dataclasses import InitVar, dataclass
@@ -10,13 +10,12 @@ from airbyte_cdk.sources.declarative.interpolation import InterpolatedString
 from airbyte_cdk.sources.declarative.interpolation.interpolated_boolean import InterpolatedBoolean
 from airbyte_cdk.sources.declarative.requesters.error_handlers.response_action import ResponseAction
 from airbyte_cdk.sources.declarative.requesters.error_handlers.response_status import ResponseStatus
-from airbyte_cdk.sources.declarative.types import Config
 from airbyte_cdk.sources.streams.http.http import HttpStream
-from dataclasses_jsonschema import JsonSchemaMixin
+from airbyte_cdk.sources.types import Config
 
 
 @dataclass
-class HttpResponseFilter(JsonSchemaMixin):
+class HttpResponseFilter:
     """
     Filter to select HttpResponses
 
@@ -33,19 +32,19 @@ class HttpResponseFilter(JsonSchemaMixin):
 
     action: Union[ResponseAction, str]
     config: Config
-    options: InitVar[Mapping[str, Any]]
-    http_codes: Set[int] = None
-    error_message_contains: str = None
+    parameters: InitVar[Mapping[str, Any]]
+    http_codes: Optional[Set[int]] = None
+    error_message_contains: Optional[str] = None
     predicate: Union[InterpolatedBoolean, str] = ""
     error_message: Union[InterpolatedString, str] = ""
 
-    def __post_init__(self, options: Mapping[str, Any]):
+    def __post_init__(self, parameters: Mapping[str, Any]) -> None:
         if isinstance(self.action, str):
             self.action = ResponseAction[self.action]
         self.http_codes = self.http_codes or set()
         if isinstance(self.predicate, str):
-            self.predicate = InterpolatedBoolean(condition=self.predicate, options=options)
-        self.error_message = InterpolatedString.create(string_or_interpolated=self.error_message, options=options)
+            self.predicate = InterpolatedBoolean(condition=self.predicate, parameters=parameters)
+        self.error_message = InterpolatedString.create(string_or_interpolated=self.error_message, parameters=parameters)
 
     def matches(self, response: requests.Response, backoff_time: Optional[float] = None) -> Optional[ResponseStatus]:
         filter_action = self._matches_filter(response)
@@ -68,18 +67,18 @@ class HttpResponseFilter(JsonSchemaMixin):
         :return: The action to execute. None if the response does not match the filter
         """
         if (
-            response.status_code in self.http_codes
+            response.status_code in self.http_codes  # type: ignore # http_codes set is always initialized to a value in __post_init__
             or (self._response_matches_predicate(response))
             or (self._response_contains_error_message(response))
         ):
-            return self.action
+            return self.action  # type: ignore # action is always cast to a ResponseAction not a str
         else:
             return None
 
     @staticmethod
-    def _safe_response_json(response: requests.Response) -> dict:
+    def _safe_response_json(response: requests.Response) -> dict[str, Any]:
         try:
-            return response.json()
+            return response.json()  # type: ignore # Response.json() returns a dictionary even if the signature does not
         except requests.exceptions.JSONDecodeError:
             return {}
 
@@ -89,14 +88,14 @@ class HttpResponseFilter(JsonSchemaMixin):
         :param response: The HTTP response which can be used during interpolation
         :return: The evaluated error message string to be emitted
         """
-        return self.error_message.eval(self.config, response=self._safe_response_json(response), headers=response.headers)
+        return self.error_message.eval(self.config, response=self._safe_response_json(response), headers=response.headers)  # type: ignore # error_message is always cast to an interpolated string
 
     def _response_matches_predicate(self, response: requests.Response) -> bool:
-        return self.predicate and self.predicate.eval(None, response=self._safe_response_json(response), headers=response.headers)
+        return bool(self.predicate and self.predicate.eval(None, response=self._safe_response_json(response), headers=response.headers))  # type: ignore # predicate is always cast to an interpolated string
 
     def _response_contains_error_message(self, response: requests.Response) -> bool:
         if not self.error_message_contains:
             return False
         else:
             error_message = HttpStream.parse_response_error_message(response)
-            return error_message and self.error_message_contains in error_message
+            return bool(error_message and self.error_message_contains in error_message)

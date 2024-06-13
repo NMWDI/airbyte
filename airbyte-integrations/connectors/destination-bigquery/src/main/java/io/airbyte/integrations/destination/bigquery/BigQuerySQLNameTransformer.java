@@ -1,10 +1,11 @@
 /*
- * Copyright (c) 2022 Airbyte, Inc., all rights reserved.
+ * Copyright (c) 2023 Airbyte, Inc., all rights reserved.
  */
 
 package io.airbyte.integrations.destination.bigquery;
 
-import io.airbyte.integrations.destination.StandardNameTransformer;
+import io.airbyte.cdk.integrations.destination.StandardNameTransformer;
+import org.jetbrains.annotations.NotNull;
 
 public class BigQuerySQLNameTransformer extends StandardNameTransformer {
 
@@ -23,13 +24,13 @@ public class BigQuerySQLNameTransformer extends StandardNameTransformer {
   }
 
   /**
-   * BigQuery allows a number to be the first character of a namespace. Datasets that begin with an
-   * underscore are hidden databases, and we cannot query <hidden-dataset>.INFORMATION_SCHEMA. So we
-   * append a letter instead of underscore for normalization. Reference:
+   * BigQuery allows a number to be the first character of a originalNamespace. Datasets that begin
+   * with an underscore are hidden databases, and we cannot query <hidden-dataset>.INFORMATION_SCHEMA.
+   * So we append a letter instead of underscore for normalization. Reference:
    * https://cloud.google.com/bigquery/docs/datasets#dataset-naming
    */
   @Override
-  public String getNamespace(final String input) {
+  public String getNamespace(@NotNull final String input) {
     if (input == null) {
       return null;
     }
@@ -39,6 +40,11 @@ public class BigQuerySQLNameTransformer extends StandardNameTransformer {
       return BigQueryConsts.NAMESPACE_PREFIX + normalizedName;
     }
     return normalizedName;
+  }
+
+  @Deprecated
+  public String getTmpTableName(final String streamName, final String randomSuffix) {
+    return convertStreamName("_airbyte_tmp" + "_" + randomSuffix + "_" + streamName);
   }
 
 }

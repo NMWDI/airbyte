@@ -17,7 +17,7 @@ Api key is not required for this connector to work,But a dummy key need to be pa
 
 ### For Airbyte Cloud:
 
-1. [Log into your Airbyte Cloud](https://cloud.airbyte.io/workspaces) account.
+1. [Log into your Airbyte Cloud](https://cloud.airbyte.com/workspaces) account.
 2. In the left navigation bar, click **Sources**. In the top-right corner, click **+new source**.
 3. On the Set up the source page, enter the name for the Punk-API connector and select **Punk-API** from the Source type dropdown.
 4. Enter your dummy `api_key`.
@@ -28,9 +28,9 @@ Api key is not required for this connector to work,But a dummy key need to be pa
 
 1. Navigate to the Airbyte Open Source dashboard.
 2. Set the name for your source.
-4. Enter your dummy `api_key`.
-5. Enter the params configuration if needed: ID (Optional)
-6. Click **Set up source**.
+3. Enter your dummy `api_key`.
+4. Enter the params configuration if needed: ID (Optional)
+5. Click **Set up source**.
 
 ## Supported sync modes
 
@@ -59,6 +59,13 @@ Punk API's [API reference](https://punkapi.com/documentation/v2) has v2 at prese
 
 ## Changelog
 
-| Version | Date       | Pull Request                                           | Subject        |
-| :------ | :--------- | :----------------------------------------------------- | :------------- |
-| 0.1.0   | 2022-10-31 | [Init](https://github.com/airbytehq/airbyte/pull/<yet>)| Initial commit |
+<details>
+  <summary>Expand to review</summary>
+
+| Version | Date       | Pull Request                                            | Subject        |
+| :------ | :--------- | :------------------------------------------------------ | :------------- |
+| 0.1.2 | 2024-06-06 | [39158](https://github.com/airbytehq/airbyte/pull/39158) | [autopull] Upgrade base image to v1.2.2 |
+| 0.1.1 | 2024-05-20 | [38441](https://github.com/airbytehq/airbyte/pull/38441) | [autopull] base image + poetry + up_to_date |
+| 0.1.0   | 2022-10-31 | [Init](https://github.com/airbytehq/airbyte/pull/<yet>) | Initial commit |
+
+</details>

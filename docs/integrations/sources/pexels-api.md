@@ -24,7 +24,7 @@ Just pass the generated API key and optional parameters for establishing the con
 
 ### For Airbyte Cloud:
 
-1. [Log into your Airbyte Cloud](https://cloud.airbyte.io/workspaces) account.
+1. [Log into your Airbyte Cloud](https://cloud.airbyte.com/workspaces) account.
 2. In the left navigation bar, click **Sources**. In the top-right corner, click **+new source**.
 3. On the Set up the source page, enter the name for the Pexels-API connector and select **Pexels-API** from the Source type dropdown.
 4. Enter your `api_key`.
@@ -63,7 +63,7 @@ The Pexels-API source connector supports the following [sync modes](https://docs
 
 ## API method example
 
-GET https://api.pexels.com/v1/curated?per_page=1
+`GET https://api.pexels.com/v1/curated?per_page=1`
 
 ## Performance considerations
 
@@ -71,6 +71,14 @@ Pexels-API's [API reference]https://www.pexels.com/api/documentation) has v1 at 
 
 ## Changelog
 
+<details>
+  <summary>Expand to review</summary>
+
 | Version | Date       | Pull Request                                            | Subject        |
 | :------ | :--------- | :------------------------------------------------------ | :------------- |
+| 0.1.3 | 2024-06-06 | [39216](https://github.com/airbytehq/airbyte/pull/39216) | [autopull] Upgrade base image to v1.2.2 |
+| 0.1.2 | 2024-05-21 | [38458](https://github.com/airbytehq/airbyte/pull/38458) | [autopull] base image + poetry + up_to_date |
+| 0.1.1 | 2024-05-21 | [38458](https://github.com/airbytehq/airbyte/pull/38458) | [autopull] base image + poetry + up_to_date |
 | 0.1.0   | 2022-11-02 | [Init](https://github.com/airbytehq/airbyte/pull/18854) | Initial commit |
+
+</details>

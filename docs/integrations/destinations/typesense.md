@@ -16,12 +16,12 @@ Each stream will be output into its own collection in Typesense. If an id column
 
 #### Features
 
-| Feature                       | Supported?\(Yes/No\) | Notes                                                                                        |
-| :---------------------------- | :------------------- | :------------------------------------------------------------------------------------------- |
-| Full Refresh Sync             | Yes                  |                                                                                              |
-| Incremental - Append Sync     | Yes                  |                                                                                              |
-| Incremental - Deduped History | No                   | As this connector does not support dbt, we don't support this sync mode on this destination. |
-| Namespaces                    | No                   |                                                                                              |
+| Feature                        | Supported?\(Yes/No\) | Notes |
+| :----------------------------- | :------------------- | :---- |
+| Full Refresh Sync              | Yes                  |       |
+| Incremental - Append Sync      | Yes                  |       |
+| Incremental - Append + Deduped | No                   |       |
+| Namespaces                     | No                   |       |
 
 ## Getting started
 
@@ -35,5 +35,17 @@ The setup only requires two fields. First is the `host` which is the address at 
 
 ## Changelog
 
-| Version | Date | Pull Request | Subject |
+<details>
+  <summary>Expand to review</summary>
+
+| Version | Date       | Pull Request                                             | Subject                       |
+| :------ | :--------- | :------------------------------------------------------- | :---------------------------- |
+| 0.1.6 | 2024-06-04 | [39050](https://github.com/airbytehq/airbyte/pull/39050) | [autopull] Upgrade base image to v1.2.1 |
+| 0.1.5 | 2024-05-20 | [38428](https://github.com/airbytehq/airbyte/pull/38428) | [autopull] base image + poetry + up_to_date |
+| 0.1.4 | 2024-03-25 | [36460](https://github.com/airbytehq/airbyte/pull/36460) | Added path config option |
+| 0.1.3 | 2024-01-17 | [34336](https://github.com/airbytehq/airbyte/pull/34336) | Fix check() arguments error |
+| 0.1.2 | 2023-08-25 | [29817](https://github.com/airbytehq/airbyte/pull/29817) | Fix writing multiple streams |
+| 0.1.1 | 2023-08-24 | [29555](https://github.com/airbytehq/airbyte/pull/29555) | Increasing connection timeout |
 | 0.1.0 | 2022-10-28 | [18349](https://github.com/airbytehq/airbyte/pull/18349) | New Typesense destination |
+
+</details>

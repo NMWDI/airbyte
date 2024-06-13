@@ -25,12 +25,12 @@ Each record will contain in its key the uuid assigned by Airbyte, and in the val
 
 #### Features
 
-| Feature                       | Supported?\(Yes/No\) | Notes                                                                                        |
-| :---------------------------- | :------------------- | :------------------------------------------------------------------------------------------- |
-| Full Refresh Sync             | No                   |                                                                                              |
-| Incremental - Append Sync     | Yes                  |                                                                                              |
-| Incremental - Deduped History | No                   | As this connector does not support dbt, we don't support this sync mode on this destination. |
-| Namespaces                    | Yes                  |                                                                                              |
+| Feature                        | Supported?\(Yes/No\) | Notes |
+| :----------------------------- | :------------------- | :---- |
+| Full Refresh Sync              | No                   |       |
+| Incremental - Append Sync      | Yes                  |       |
+| Incremental - Append + Deduped | No                   |       |
+| Namespaces                     | Yes                  |       |
 
 ## Getting started
 
@@ -56,7 +56,7 @@ Also, notice that the messages will be sent to topics based on the configured Pu
 
 #### Target topics
 
-You can determine the topics to which messages are written via the `topic_pattern` configuration parameter in its corresponding Pulsar `topic_tenant`-`topic_namespace`. Messages can be written to either a hardcoded, pre-defined topic, or dynamically written to different topics based on the [namespace](https://docs.airbyte.io/understanding-airbyte/namespaces) or stream they came from.
+You can determine the topics to which messages are written via the `topic_pattern` configuration parameter in its corresponding Pulsar `topic_tenant`-`topic_namespace`. Messages can be written to either a hardcoded, pre-defined topic, or dynamically written to different topics based on the [namespace](https://docs.airbyte.com/understanding-airbyte/namespaces) or stream they came from.
 
 To write all messages to a single hardcoded topic, enter its name in the `topic_pattern` field e.g: setting `topic_pattern` to `my-topic-name` will write all messages from all streams and namespaces to that topic.
 
@@ -90,8 +90,13 @@ You should now have all the requirements needed to configure Pulsar as a destina
 
 More info about this can be found in the [Pulsar producer configs documentation site](https://pulsar.apache.org/docs/en/client-libraries-java/#producer).
 
-## CHANGELOG
+## Changelog
+
+<details>
+  <summary>Expand to review</summary>
 
 | Version | Date       | Pull Request                                             | Subject                                                                        |
 | :------ | :--------- | :------------------------------------------------------- | :----------------------------------------------------------------------------- |
 | 0.1.3   | 2022-08-05 | [15349](https://github.com/airbytehq/airbyte/pull/15349) | Update Pulsar destination to use outputRecordCollector to properly store state |
+
+</details>

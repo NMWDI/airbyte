@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Airbyte, Inc., all rights reserved.
+ * Copyright (c) 2023 Airbyte, Inc., all rights reserved.
  */
 
 package io.airbyte.integrations.destination.s3;
@@ -22,8 +22,16 @@ import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.UploadPartRequest;
 import com.amazonaws.services.s3.model.UploadPartResult;
 import com.fasterxml.jackson.databind.JsonNode;
-import io.airbyte.protocol.models.AirbyteConnectionStatus;
-import io.airbyte.protocol.models.AirbyteConnectionStatus.Status;
+import io.airbyte.cdk.integrations.destination.s3.S3BaseChecks;
+import io.airbyte.cdk.integrations.destination.s3.S3DestinationConfig;
+import io.airbyte.cdk.integrations.destination.s3.S3DestinationConfigFactory;
+import io.airbyte.cdk.integrations.destination.s3.S3StorageOperations;
+import io.airbyte.cdk.integrations.destination.s3.StorageProvider;
+import io.airbyte.commons.json.Jsons;
+import io.airbyte.protocol.models.v0.AirbyteConnectionStatus;
+import io.airbyte.protocol.models.v0.AirbyteConnectionStatus.Status;
+import java.util.Collections;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -52,7 +60,7 @@ public class S3DestinationTest {
 
     factoryConfig = new S3DestinationConfigFactory() {
 
-      public S3DestinationConfig getS3DestinationConfig(final JsonNode config, final StorageProvider storageProvider) {
+      public S3DestinationConfig getS3DestinationConfig(final JsonNode config, final StorageProvider storageProvider, Map<String, String> env) {
         return S3DestinationConfig.create("fake-bucket", "fake-bucketPath", "fake-region")
             .withEndpoint("https://s3.example.com")
             .withAccessKeyCredential("fake-accessKeyId", "fake-secretAccessKey")
@@ -68,9 +76,9 @@ public class S3DestinationTest {
    * Test that check will fail if IAM user does not have listObjects permission
    */
   public void checksS3WithoutListObjectPermission() {
-    final S3Destination destinationFail = new S3Destination(factoryConfig);
+    final S3Destination destinationFail = new S3Destination(factoryConfig, Collections.emptyMap());
     doThrow(new AmazonS3Exception("Access Denied")).when(s3).listObjects(any(ListObjectsRequest.class));
-    final AirbyteConnectionStatus status = destinationFail.check(null);
+    final AirbyteConnectionStatus status = destinationFail.check(Jsons.emptyObject());
     assertEquals(Status.FAILED, status.getStatus(), "Connection check should have failed");
     assertTrue(status.getMessage().indexOf("Access Denied") > 0, "Connection check returned wrong failure message");
   }
@@ -80,14 +88,14 @@ public class S3DestinationTest {
    * Test that check will succeed when IAM user has all required permissions
    */
   public void checksS3WithListObjectPermission() {
-    final S3Destination destinationSuccess = new S3Destination(factoryConfig);
-    final AirbyteConnectionStatus status = destinationSuccess.check(null);
+    final S3Destination destinationSuccess = new S3Destination(factoryConfig, Collections.emptyMap());
+    final AirbyteConnectionStatus status = destinationSuccess.check(Jsons.emptyObject());
     assertEquals(Status.SUCCEEDED, status.getStatus(), "Connection check should have succeeded");
   }
 
   @Test
   public void createsThenDeletesTestFile() {
-    S3BaseChecks.attemptS3WriteAndDelete(mock(S3StorageOperations.class), config, "fake-fileToWriteAndDelete", s3);
+    S3BaseChecks.attemptS3WriteAndDelete(mock(S3StorageOperations.class), config, "fake-fileToWriteAndDelete");
 
     // We want to enforce that putObject happens before deleteObject, so use inOrder.verify()
     final InOrder inOrder = Mockito.inOrder(s3);
