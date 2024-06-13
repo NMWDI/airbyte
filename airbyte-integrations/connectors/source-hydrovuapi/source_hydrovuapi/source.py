@@ -311,7 +311,7 @@ class Readings(HydroVuStream):
     # Required
     primary_key = 'id'
     # cursor_field = "latest_timestamp_for_each_location"
-
+    cursor_field = 'timestamp'
     def __init__(self, auth, *args, **kw):
         super(Readings, self).__init__(*args, **kw)
 
