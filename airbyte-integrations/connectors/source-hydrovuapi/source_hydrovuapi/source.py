@@ -68,7 +68,7 @@ class Locations(HydrovuapiStream):
 
 
 class Readings(HydrovuapiStream):
-    primary_key = "readingId"
+    primary_key = "id"
     cursor_field = "timestamp"
 
     def __init__(self, start, parent_stream: Stream, **kwargs: Any) -> None:
