@@ -89,7 +89,7 @@ class Parameters(HydroVuStream):
     """
 
     # Required
-    primary_key = "id"
+    primary_key = "parameterCode"
 
     def __init__(self, *args, **kw):
         super(Parameters, self).__init__(*args, **kw)
@@ -309,9 +309,8 @@ class Readings(HydroVuStream):
     """
 
     # Required
-    primary_key = 'id'
-
-    cursor_field = "latest_timestamp_for_each_location"
+    # primary_key = 'id'
+    # cursor_field = "latest_timestamp_for_each_location"
 
     def __init__(self, auth, *args, **kw):
         super(Readings, self).__init__(*args, **kw)
