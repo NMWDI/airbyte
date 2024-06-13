@@ -1,0 +1,6 @@
+{
+  "client_id": "NMWDI",
+  "client_secret": "2ac81dc481f44598a71c60531a991486",
+  "agency": "PVACD",
+  "token_refresh_endpoint": "https://hydrovu.com/public-api/oauth/token"
+}
