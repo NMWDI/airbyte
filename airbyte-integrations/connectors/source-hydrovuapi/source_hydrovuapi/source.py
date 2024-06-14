@@ -35,6 +35,22 @@ class HydrovuapiStream(HttpStream, ABC):
     def use_cache(self) -> bool:
         return True
 
+    def request_headers(
+            self, stream_state: Mapping[str, Any], stream_slice: Mapping[str, any] = None, next_page_token: Mapping[str, Any] = None
+    ) -> MutableMapping[str, Any]:
+        """
+        The X-ISI-Start-Page is a header that is required if accessing any page beyond the fist
+        page from the given path to the readings for a given location. If accessing the first page, then the
+        header can be empty.
+        """
+
+        if not next_page_token:
+            return {}
+        else:
+            return {"X-ISI-Start-Page": next_page_token}
+
+    def next_page_token(self, response: requests.Response) -> Optional[Mapping[str, Any]]:
+        return response.headers['X-ISI-Next-Page']
 
 class Locations(HydrovuapiStream):
     primary_key = "id"
@@ -115,22 +131,7 @@ class Readings(HydrovuapiStream):
 
         return params
 
-    def request_headers(
-            self, stream_state: Mapping[str, Any], stream_slice: Mapping[str, any] = None, next_page_token: Mapping[str, Any] = None
-    ) -> MutableMapping[str, Any]:
-        """
-        The X-ISI-Start-Page is a header that is required if accessing any page beyond the fist
-        page from the given path to the readings for a given location. If accessing the first page, then the
-        header can be empty.
-        """
 
-        if not next_page_token:
-            return {}
-        else:
-            return {"X-ISI-Start-Page": next_page_token}
-
-    def next_page_token(self, response: requests.Response) -> Optional[Mapping[str, Any]]:
-        return response.headers['X-ISI-Next-Page']
 
     def read_records(
         self,
