@@ -31,10 +31,6 @@ from requests_oauthlib import OAuth2Session
 class HydrovuapiStream(HttpStream, ABC):
     url_base = "https://www.hydrovu.com/public-api/v1/"
 
-    @property
-    def use_cache(self) -> bool:
-        return True
-
     def request_headers(
             self, stream_state: Mapping[str, Any], stream_slice: Mapping[str, any] = None, next_page_token: Mapping[str, Any] = None
     ) -> MutableMapping[str, Any]:
@@ -43,20 +39,14 @@ class HydrovuapiStream(HttpStream, ABC):
         page from the given path to the readings for a given location. If accessing the first page, then the
         header can be empty.
         """
-
-        if not next_page_token:
-            return {}
-        else:
-            return {"X-ISI-Start-Page": next_page_token}
+        return {"X-ISI-Start-Page": next_page_token or '', 'Accept': 'application/json'}
 
     def next_page_token(self, response: requests.Response) -> Optional[Mapping[str, Any]]:
-        return response.headers['X-ISI-Next-Page']
+        return response.headers.get('x-isi-next-page', '')
+
 
 class Locations(HydrovuapiStream):
     primary_key = "id"
-
-    def next_page_token(self, response: requests.Response) -> Optional[Mapping[str, Any]]:
-        return None
 
     def parse_response(
             self,
@@ -131,18 +121,17 @@ class Readings(HydrovuapiStream):
 
         return params
 
-
-
     def read_records(
-        self,
-        sync_mode: SyncMode,
-        cursor_field: Optional[List[str]] = None,
-        stream_slice: Optional[Mapping[str, Any]] = None,
-        stream_state: Optional[Mapping[str, Any]] = None,
+            self,
+            sync_mode: SyncMode,
+            cursor_field: Optional[List[str]] = None,
+            stream_slice: Optional[Mapping[str, Any]] = None,
+            stream_state: Optional[Mapping[str, Any]] = None,
     ) -> Iterable[StreamData]:
 
         try:
-            yield from super().read_records(sync_mode=sync_mode, cursor_field=cursor_field, stream_slice=stream_slice, stream_state=stream_state)
+            yield from super().read_records(sync_mode=sync_mode, cursor_field=cursor_field, stream_slice=stream_slice,
+                                            stream_state=stream_state)
         except Exception as e:
             print(e)
             yield from []
