@@ -1,0 +1,42 @@
+{
+  "$schema" : "http://json-schema.org/draft-07/schema#",
+  "type" : "object",
+  "properties" : {
+    "or_site_id" : {
+      "type" : "integer",
+      "description" : "OneRain Contrail Site ID"
+    },
+    "site_id" : {
+      "type" : "string",
+      "description" : "descriptive alias to or_site_id"
+    },
+    "location" : {
+      "desription" : "describes site location",
+      "type" : "string"
+    },
+    "owner" : {
+      "desription" : "DEPRECATED",
+      "type" : "string"
+    },
+    "system_id" : {
+      "description" : "identifies the input system for which the site belongs.",
+      "type" : "integer"
+    },
+    "client_id" : {
+      "description" : "identifies the client that owns the input system for which the site belongs.",
+      "type" : "string"
+    },
+    "latitude_dec" : {
+      "description" : "latitude of site in decimal form",
+      "type" : "number"
+    },
+    "longitude_dec" : {
+      "description" : "longitude of site in decimal form",
+      "type" : "number"
+    },
+    "elevation" : {
+      "description" : "elevation of site",
+      "type" : "number"
+    }
+  }
+}

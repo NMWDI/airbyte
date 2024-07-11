@@ -1,0 +1,166 @@
+{
+  "$schema" : "http://json-schema.org/draft-07/schema#",
+  "type" : "object",
+  "properties" : {
+    "site_id" : {
+      "type" : "string",
+      "description" : "descriptive alias to or_site_id"
+    },
+    "sensor_id" : {
+      "type" : "string",
+      "description" : "descriptive alias to or_sensor_id"
+    },
+    "or_site_id" : {
+      "type" : "integer",
+      "description" : "OneRain Contrail Site ID"
+    },
+    "or_sensor_id" : {
+      "type" : "integer",
+      "description" : "OneRain Contrail Sensor ID"
+    },
+    "location" : {
+      "description" : "site name",
+      "type" : "string"
+    },
+    "description" : {
+      "description" : "sensor name",
+      "type" : "string"
+    },
+    "sensor_class" : {
+      "type" : "integer",
+      "description" : "numeric Sensor class as defined in Contrail"
+    },
+    "sensor_type" : {
+      "description" : "source type of data",
+      "type" : "string"
+    },
+    "units" : {
+      "type" : "string",
+      "description" : "unit type used in measurement"
+    },
+    "translate" : {
+      "description" : "text translation enabled",
+      "type" : "boolean"
+    },
+    "precision" : {
+      "description" : "number of decimals displayed for Reading/Finished value in user interface",
+      "type" : "integer"
+    },
+    "last_time" : {
+      "description" : "last data time; see GetSensorData A5",
+      "type" : "string"
+    },
+    "last_value" : {
+      "description" : "last Reading/Finished; see GetSensorData A8",
+      "type" : "number"
+    },
+    "last_time_received" : {
+      "description" : "last data time; see GetSensorData A5",
+      "type" : "string"
+    },
+    "last_value_received" : {
+      "description" : "last Reading/Finished value; see GetSensorData A8",
+      "type" : "number"
+    },
+    "last_raw_value" : {
+      "description" : "last raw value; see GetSensorData A6",
+      "type" : "number"
+    },
+    "last_raw_value_received" : {
+      "description" : "last raw value received; see GetSensorData A6",
+      "type" : "number"
+    },
+    "change_time" : {
+      "description" : "time of last change to sensor metadata",
+      "type" : "string"
+    },
+    "normal" : {
+      "description" : "is sensor in normal mode (not timed out)?",
+      "type" : "integer"
+    },
+    "active" : {
+      "description" : "is sensor active (not in maintenance mode/out of service)?",
+      "type" : "integer"
+    },
+    "valid" : {
+      "description" : "*may* indicate if last value is valid. unknown",
+      "type" : "integer"
+    },
+    "change_rate" : {
+      "description" : "DEPRECATED/UNUSED",
+      "type" : "number"
+    },
+    "time_min_consec_zeros" : {
+      "description" : "DEPRECATED/UNUSED",
+      "type" : "integer"
+    },
+    "validation" : {
+      "description" : "validation protocol for finished value",
+      "type" : "string"
+    },
+    "value_max" : {
+      "description" : "validation parameter: maximum value",
+      "type" : "number"
+    },
+    "value_min" : {
+      "description" : "validation parameter: minimum value",
+      "type" : "number"
+    },
+    "delta_pos" : {
+      "description" : "validation parameter: positive delta",
+      "type" : "number"
+    },
+    "delta_neg" : {
+      "description" : "validation parameter: negative delta",
+      "type" : "number"
+    },
+    "rate_pos" : {
+      "description" : "DEPRECATED",
+      "type" : "integer"
+    },
+    "rate_neg" : {
+      "description" : "DEPRECATED",
+      "type" : "integer"
+    },
+    "time_max" : {
+      "description" : "validation parameter: maximum time",
+      "type" : "integer"
+    },
+    "time_min" : {
+      "description" : "validation parameter: minimum time",
+      "type" : "integer"
+    },
+    "slope" : {
+      "description" : "used in data conversion; multiplicative value",
+      "type" : "number"
+    },
+    "offset" : {
+      "description" : "used in data conversion; additive value",
+      "type" : "number"
+    },
+    "reference" : {
+      "description" : "used in data conversion; additive value",
+      "type" : "number"
+    },
+    "utc_offset" : {
+      "description" : "the numeric offset (in hours) from Universal Coordinated Time",
+      "type" : "integer"
+    },
+    "using_dst" : {
+      "description" : "DEPRECATED",
+      "type" : "boolean"
+    },
+    "conversion" : {
+      "description" : "conversion protocol for raw to finished value",
+      "type" : "string"
+    },
+    "usage" : {
+      "description" : "DEPRECATED/UNUSED",
+      "type" : "string"
+    },
+    "protocol" : {
+      "description" : "DEPRECATED/UNUSED",
+      "type" : "integer"
+    }
+  }
+}
