@@ -154,7 +154,6 @@ class GetSiteMetaData(OnerainApiStream):
     ) -> MutableMapping[str, Any]:
         params = super().request_params(stream_state, stream_slice, next_page_token)
         params['method'] = 'GetSiteMetaData'
-        params['class'] = 94
         return params
 
 
