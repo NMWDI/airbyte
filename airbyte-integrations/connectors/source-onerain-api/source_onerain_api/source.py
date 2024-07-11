@@ -297,6 +297,9 @@ class GetSensorData(OnerainApiStream):
             return []
 
 
+class BackloadGetSensorData(GetSensorData):
+    pass
+
 # # Basic incremental stream
 # class IncrementalOnerainApiStream(OnerainApiStream, ABC):
 #     """
@@ -403,8 +406,8 @@ class SourceOnerainApi(AbstractSource):
         # start = datetime.now()
         site_stream = GetSiteMetaData(config=config)
         sensor_stream = GetSensorMetaData(config=config, parent_stream=site_stream)
-        backload_stream = GetSensorData(config=config, parent_stream=site_stream, sensor_stream=sensor_stream,
-                                        start=start)
+        backload_stream = BackloadGetSensorData(config=config, parent_stream=site_stream, sensor_stream=sensor_stream,
+                                                start=start)
         data_stream = GetSensorData(config=config, parent_stream=site_stream, sensor_stream=sensor_stream)
 
         return [site_stream, sensor_stream, backload_stream, data_stream]
