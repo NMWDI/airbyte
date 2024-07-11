@@ -184,7 +184,6 @@ class GetSensorMetaData(OnerainApiStream):
 
 class GetSensorData(OnerainApiStream):
     primary_key = ""
-    cursor_field = "data_time"
     _start_ts = None
 
     def __init__(self, parent_stream: Stream,
@@ -196,6 +195,9 @@ class GetSensorData(OnerainApiStream):
         if start:
             self._start_ts = start.timestamp()
 
+    @property
+    def cursor_field(self) -> str:
+        return "data_time"
     # def read_records(
     #         self,
     #         sync_mode: SyncMode,
