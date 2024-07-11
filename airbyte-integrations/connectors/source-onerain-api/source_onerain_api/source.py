@@ -233,6 +233,7 @@ class GetSensorData(OnerainApiStream):
                 state = stream_state.get(parent_record['or_site_id'], {})
                 start_ts = state.get(self.cursor_field, self._start_ts) if stream_state else self._start_ts
 
+            print("or_site_id", parent_record['or_site_id'], start_ts, stream_state)
             if start_ts is None:
                 start_ts = now_ts - (60 * 60 * 24 * 2)
 
