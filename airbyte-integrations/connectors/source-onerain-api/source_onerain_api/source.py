@@ -225,19 +225,16 @@ class GetSensorData(OnerainApiStream):
         Slices the stream based on locationId
         """
         now_ts = datetime.now().timestamp() - (60 * 60 * 24 * 2)
+        start_ts = None
+        if stream_state:
+            start_ts = stream_state.get(self.cursor_field, self._start_ts) if stream_state else self._start_ts
 
-        for k, parent_record in enumerate(self._parent_stream.read_records(sync_mode=sync_mode)):
+        if start_ts is None:
+            start_ts = now_ts - (60 * 60 * 24 * 10)
 
-            start_ts = None
-            if stream_state:
-                state = stream_state.get(parent_record['or_site_id'], {})
-                start_ts = state.get(self.cursor_field, self._start_ts) if stream_state else self._start_ts
+        for i, (start, end) in enumerate(self.chunk_dates(start_ts, now_ts)):
+            for k, parent_record in enumerate(self._parent_stream.read_records(sync_mode=sync_mode)):
 
-            print("or_site_id", parent_record['or_site_id'], start_ts, stream_state)
-            if start_ts is None:
-                start_ts = now_ts - (60 * 60 * 24 * 2)
-
-            for i, (start, end) in enumerate(self.chunk_dates(start_ts, now_ts)):
                 for m, sensor_record in enumerate(self._sensor_stream.read_records(sync_mode=sync_mode,
                                                                                    stream_slice={'location': parent_record})):
 
@@ -247,7 +244,7 @@ class GetSensorData(OnerainApiStream):
                         yield {'location': parent_record, 'sensor': sensor_record, 'start': start, 'end': end}
 
     def chunk_dates(self, start_date_ts: int, end_date_ts: int) -> Iterable[Tuple[int, int]]:
-        _SLICE_RANGE = 30  # days
+        _SLICE_RANGE = 10  # days
         step = int(_SLICE_RANGE * 24 * 60 * 60)
 
         # after_ts = end_date_ts
@@ -264,17 +261,17 @@ class GetSensorData(OnerainApiStream):
             after_ts = before_ts + 1
 
     def get_updated_state(self, current_stream_state: MutableMapping[str, Any], latest_record: Mapping[str, Any]) -> Mapping[str, Any]:
-        key = latest_record['or_site_id']
-        state = current_stream_state.get(key, {})
+        # key = latest_record['or_site_id']
+        # state = current_stream_state.get(key, {})
         dt = latest_record.get(self.cursor_field)
         if dt is not None:
             dt = datetime.strptime(dt, '%Y-%m-%d %H:%M:%S').timestamp()
         else:
             dt = 0
 
-        state_value = max(state.get(self.cursor_field, 0), dt)
-        current_stream_state[key] = {self.cursor_field: state_value}
-        return current_stream_state
+        state_value = max(current_stream_state.get(self.cursor_field, 0), dt)
+        return {self.cursor_field: state_value}
+
 
         # return {latest_record['location']['or_site_id']: latest_record[self.cursor_field]}
     #     state_value = max(current_stream_state.get(self.cursor_field, 0), latest_record.get(self.cursor_field, 0))
