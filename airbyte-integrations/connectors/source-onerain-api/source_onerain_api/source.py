@@ -184,14 +184,17 @@ class GetSensorMetaData(OnerainApiStream):
 
 class GetSensorData(OnerainApiStream):
     primary_key = ""
-    # cursor_field = "time"
+    cursor_field = "data_time"
+    _start_ts = None
 
-    def __init__(self, start: datetime, parent_stream: Stream,
-                 sensor_stream: Stream, **kw: Any) -> None:
+    def __init__(self, parent_stream: Stream,
+                 sensor_stream: Stream, start: datetime = None, **kw: Any) -> None:
         super().__init__(**kw)
         self._parent_stream = parent_stream
         self._sensor_stream = sensor_stream
-        self._start_ts = start.timestamp()
+
+        if start:
+            self._start_ts = start.timestamp()
 
     # def read_records(
     #         self,
@@ -219,36 +222,56 @@ class GetSensorData(OnerainApiStream):
         """
         Slices the stream based on locationId
         """
-        start_ts = stream_state.get(self.cursor_field, self._start_ts) if stream_state else self._start_ts
         now_ts = datetime.now().timestamp() - (60 * 60 * 24 * 2)
 
-        for i, (start, end) in enumerate(self.chunk_dates(start_ts, now_ts)):
-            for k, parent_record in enumerate(self._parent_stream.read_records(sync_mode=sync_mode)):
+        for k, parent_record in enumerate(self._parent_stream.read_records(sync_mode=sync_mode)):
+
+            start_ts = None
+            if stream_state:
+                state = stream_state.get(parent_record['or_site_id'], {})
+                start_ts = state.get(self.cursor_field, self._start_ts) if stream_state else self._start_ts
+
+            if start_ts is None:
+                start_ts = now_ts - (60 * 60 * 24 * 2)
+
+            for i, (start, end) in enumerate(self.chunk_dates(start_ts, now_ts)):
                 for m, sensor_record in enumerate(self._sensor_stream.read_records(sync_mode=sync_mode,
                                                                                    stream_slice={'location': parent_record})):
                     if sensor_record['or_sensor_id'] == '2':
                         print(datetime.fromtimestamp(start), datetime.fromtimestamp(end))
                         yield {'location': parent_record, 'sensor': sensor_record, 'start': start, 'end': end}
 
-
     def chunk_dates(self, start_date_ts: int, end_date_ts: int) -> Iterable[Tuple[int, int]]:
-        _SLICE_RANGE = 1  # days
+        _SLICE_RANGE = 4  # days
         step = int(_SLICE_RANGE * 24 * 60 * 60)
 
-        after_ts = end_date_ts
-        while after_ts > start_date_ts:
-            # before_ts = after_ts
-            before_ts = max(start_date_ts, after_ts - step)
-            yield before_ts, after_ts
-            after_ts = before_ts - 1
+        # after_ts = end_date_ts
+        # while after_ts > start_date_ts:
+        #     # before_ts = after_ts
+        #     before_ts = max(start_date_ts, after_ts - step)
+        #     yield before_ts, after_ts
+        #     after_ts = before_ts - 1
 
-        # after_ts = start_date_ts
-        # while after_ts < end_date_ts:
-        #     before_ts = min(end_date_ts, after_ts + step)
-        #     yield after_ts, before_ts
-        #     after_ts = before_ts + 1
+        after_ts = start_date_ts
+        while after_ts < end_date_ts:
+            before_ts = min(end_date_ts, after_ts + step)
+            yield after_ts, before_ts
+            after_ts = before_ts + 1
 
-    # def get_updated_state(self, current_stream_state: MutableMapping[str, Any], latest_record: Mapping[str, Any]) -> Mapping[str, Any]:
+    def get_updated_state(self, current_stream_state: MutableMapping[str, Any], latest_record: Mapping[str, Any]) -> Mapping[str, Any]:
+        key = latest_record['or_site_id']
+        state = current_stream_state.get(key, {})
+        dt = latest_record.get(self.cursor_field)
+        if dt is not None:
+            dt = datetime.strptime(dt, '%Y-%m-%d %H:%M:%S').timestamp()
+        else:
+            dt = 0
+
+        state_value = max(state.get(self.cursor_field, 0), dt)
+        current_stream_state[key] = {self.cursor_field: state_value}
+        return current_stream_state
+
+        # return {latest_record['location']['or_site_id']: latest_record[self.cursor_field]}
     #     state_value = max(current_stream_state.get(self.cursor_field, 0), latest_record.get(self.cursor_field, 0))
     #     print('updafa', state_value, current_stream_state, latest_record)
     #     return {self.cursor_field: state_value}
@@ -375,10 +398,12 @@ class SourceOnerainApi(AbstractSource):
         # TODO remove the authenticator if not required.
         # auth = TokenAuthenticator(token="api_key")  # Oauth2Authenticator is also available if you need oauth support
         # return [Customers(authenticator=auth), Employees(authenticator=auth)]
-        start = datetime.strptime('2024', '%Y')
+        start = datetime.strptime('2020', '%Y')
         # start = datetime.now()
         site_stream = GetSiteMetaData(config=config)
         sensor_stream = GetSensorMetaData(config=config, parent_stream=site_stream)
-        return [site_stream, sensor_stream,
-                GetSensorData(start,
-                              config=config, parent_stream=site_stream, sensor_stream=sensor_stream)]
+        backload_stream = GetSensorData(config=config, parent_stream=site_stream, sensor_stream=sensor_stream,
+                                        start=start)
+        data_stream = GetSensorData(config=config, parent_stream=site_stream, sensor_stream=sensor_stream)
+
+        return [site_stream, sensor_stream, backload_stream, data_stream]
