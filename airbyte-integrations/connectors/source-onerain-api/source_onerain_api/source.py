@@ -238,10 +238,7 @@ class GetSensorData(OnerainApiStream):
                 for m, sensor_record in enumerate(self._sensor_stream.read_records(sync_mode=sync_mode,
                                                                                    stream_slice={'location': parent_record})):
 
-
-                    # 94 = (2) Gauge Height, (3) Gauge Height, Elevation - Water Level, Gauge Height
-                    if sensor_record['sensor_class'] in ('94', ):
-                        yield {'location': parent_record, 'sensor': sensor_record, 'start': start, 'end': end}
+                    yield {'location': parent_record, 'sensor': sensor_record, 'start': start, 'end': end}
 
     def chunk_dates(self, start_date_ts: int, end_date_ts: int) -> Iterable[Tuple[int, int]]:
         _SLICE_RANGE = 10  # days
