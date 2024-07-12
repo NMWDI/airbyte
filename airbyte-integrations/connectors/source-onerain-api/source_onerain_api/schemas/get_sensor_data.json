@@ -2,12 +2,14 @@
   "$schema" : "http://json-schema.org/draft-07/schema#",
   "type" : "object",
   "properties" : {
-    "site_id": {"type":"string", "description": "descriptive alias to or_site_id"},
-    "sensor_id": {"type":"string", "description": "descriptive alias to or_sensor_id"},
     "or_site_id": {"type": "integer", "description":"OneRain Contrail Site ID"},
     "or_sensor_id": {"type":"integer", "description":"OneRain Contrail Sensor ID"},
-    "sensor_class": {"type":"integer", "description": "numeric Sensor class as defined in Contrail"},
     "data_time" : {
+      "type" : "string",
+      "description" : "date/time data was captured",
+      "pattern" : "^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2} [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}"
+    },
+    "receive_time" : {
       "type" : "string",
       "description" : "date/time data was captured",
       "pattern" : "^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2} [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}"
@@ -20,7 +22,7 @@
       "type" : "number",
       "description" : "this is the value supplied by the source system. It is the value before any conversion or validation is applied."
     },
-    "units": {"type":"string", "description": "unit type used in measurement"}
+    "data_quality": {"type":"string", "description": "data quality flag"}
 
   }
 }
