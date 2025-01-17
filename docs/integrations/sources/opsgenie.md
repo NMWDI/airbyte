@@ -54,6 +54,18 @@ The Opsgenie connector uses the most recent API version for each source of data.
 
 | Version | Date       | Pull Request                                             | Subject                                                                         |
 | :------ | :--------- | :------------------------------------------------------- | :------------------------------------------------------------------------------ |
+| 0.4.6 | 2025-01-11 | [50293](https://github.com/airbytehq/airbyte/pull/50293) | Update dependencies |
+| 0.4.5 | 2024-12-14 | [49661](https://github.com/airbytehq/airbyte/pull/49661) | Update dependencies |
+| 0.4.4 | 2024-12-12 | [48253](https://github.com/airbytehq/airbyte/pull/48253) | Update dependencies |
+| 0.4.3 | 2024-10-29 | [47920](https://github.com/airbytehq/airbyte/pull/47920) | Update dependencies |
+| 0.4.2 | 2024-10-28 | [47653](https://github.com/airbytehq/airbyte/pull/47653) | Update dependencies |
+| 0.4.1 | 2024-08-16 | [44196](https://github.com/airbytehq/airbyte/pull/44196) | Bump source-declarative-manifest version |
+| 0.4.0 | 2024-08-15 | [44105](https://github.com/airbytehq/airbyte/pull/44105) | Refactor connector to manifest-only format |
+| 0.3.16 | 2024-08-10 | [43579](https://github.com/airbytehq/airbyte/pull/43579) | Update dependencies |
+| 0.3.15 | 2024-08-03 | [43248](https://github.com/airbytehq/airbyte/pull/43248) | Update dependencies |
+| 0.3.14 | 2024-07-27 | [42650](https://github.com/airbytehq/airbyte/pull/42650) | Update dependencies |
+| 0.3.13 | 2024-07-20 | [42193](https://github.com/airbytehq/airbyte/pull/42193) | Update dependencies |
+| 0.3.12 | 2024-07-13 | [41895](https://github.com/airbytehq/airbyte/pull/41895) | Update dependencies |
 | 0.3.11 | 2024-07-10 | [41493](https://github.com/airbytehq/airbyte/pull/41493) | Update dependencies |
 | 0.3.10 | 2024-07-09 | [41132](https://github.com/airbytehq/airbyte/pull/41132) | Update dependencies |
 | 0.3.9 | 2024-07-06 | [40988](https://github.com/airbytehq/airbyte/pull/40988) | Update dependencies |

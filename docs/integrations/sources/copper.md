@@ -44,6 +44,16 @@ The Copper source connector supports the following [sync modes](https://docs.air
 
 | Version | Date       | Pull Request                                              | Subject                                                                         |
 | :------ | :--------- | :-------------------------------------------------------- | :------------------------------------------------------------------------------ |
+| 0.4.4 | 2025-01-11 | [48940](https://github.com/airbytehq/airbyte/pull/48940) | Update dependencies |
+| 0.4.3 | 2024-11-04 | [48146](https://github.com/airbytehq/airbyte/pull/48146) | Update dependencies |
+| 0.4.2 | 2024-10-28 | [47660](https://github.com/airbytehq/airbyte/pull/47660) | Update dependencies |
+| 0.4.1 | 2024-08-16 | [44196](https://github.com/airbytehq/airbyte/pull/44196) | Bump source-declarative-manifest version |
+| 0.4.0 | 2024-08-15 | [44159](https://github.com/airbytehq/airbyte/pull/44159) | Refactor connector to manifest-only format |
+| 0.3.16 | 2024-08-10 | [43674](https://github.com/airbytehq/airbyte/pull/43674) | Update dependencies |
+| 0.3.15 | 2024-08-03 | [43118](https://github.com/airbytehq/airbyte/pull/43118) | Update dependencies |
+| 0.3.14 | 2024-07-27 | [42710](https://github.com/airbytehq/airbyte/pull/42710) | Update dependencies |
+| 0.3.13 | 2024-07-20 | [42266](https://github.com/airbytehq/airbyte/pull/42266) | Update dependencies |
+| 0.3.12 | 2024-07-13 | [41843](https://github.com/airbytehq/airbyte/pull/41843) | Update dependencies |
 | 0.3.11 | 2024-07-10 | [41385](https://github.com/airbytehq/airbyte/pull/41385) | Update dependencies |
 | 0.3.10 | 2024-07-09 | [41111](https://github.com/airbytehq/airbyte/pull/41111) | Update dependencies |
 | 0.3.9 | 2024-07-06 | [41004](https://github.com/airbytehq/airbyte/pull/41004) | Update dependencies |

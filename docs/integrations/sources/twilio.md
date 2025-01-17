@@ -100,6 +100,12 @@ For more information, see [the Twilio docs for rate limitations](https://support
 
 | Version | Date       | Pull Request                                             | Subject                                                                                                 |
 | :------ | :--------- | :------------------------------------------------------- | :------------------------------------------------------------------------------------------------------ |
+| 0.11.14 | 2024-12-28 | [50803](https://github.com/airbytehq/airbyte/pull/50803) | Update dependencies |
+| 0.11.13 | 2024-11-25 | [43769](https://github.com/airbytehq/airbyte/pull/43769) | Starting with this version, the Docker image is now rootless. Please note that this and future versions will not be compatible with Airbyte versions earlier than 0.64 |
+| 0.11.12 | 2024-08-03 | [43132](https://github.com/airbytehq/airbyte/pull/43132) | Update dependencies |
+| 0.11.11 | 2024-07-27 | [42593](https://github.com/airbytehq/airbyte/pull/42593) | Update dependencies |
+| 0.11.10 | 2024-07-20 | [42177](https://github.com/airbytehq/airbyte/pull/42177) | Update dependencies |
+| 0.11.9 | 2024-07-13 | [41845](https://github.com/airbytehq/airbyte/pull/41845) | Update dependencies |
 | 0.11.8 | 2024-07-10 | [41478](https://github.com/airbytehq/airbyte/pull/41478) | Update dependencies |
 | 0.11.7 | 2024-06-26 | [40527](https://github.com/airbytehq/airbyte/pull/40527) | Update dependencies |
 | 0.11.6 | 2024-06-22 | [40030](https://github.com/airbytehq/airbyte/pull/40030) | Update dependencies |

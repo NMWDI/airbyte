@@ -68,6 +68,19 @@ The Freshsales connector should not run into Freshsales API limitations under no
 
 | Version | Date       | Pull Request                                             | Subject                                                      |
 | :------ | :--------- | :------------------------------------------------------- | :----------------------------------------------------------- |
+| 1.1.6 | 2025-01-11 | [51070](https://github.com/airbytehq/airbyte/pull/51070) | Update dependencies |
+| 1.1.5 | 2024-12-28 | [50527](https://github.com/airbytehq/airbyte/pull/50527) | Update dependencies |
+| 1.1.4 | 2024-12-21 | [50004](https://github.com/airbytehq/airbyte/pull/50004) | Update dependencies |
+| 1.1.3 | 2024-12-14 | [49473](https://github.com/airbytehq/airbyte/pull/49473) | Update dependencies |
+| 1.1.2 | 2024-12-12 | [49203](https://github.com/airbytehq/airbyte/pull/49203) | Update dependencies |
+| 1.1.1 | 2024-10-28 | [44277](https://github.com/airbytehq/airbyte/pull/44277) | Update dependencies |
+| 1.1.0 | 2024-08-15 | [44149](https://github.com/airbytehq/airbyte/pull/44149) | Refactor connector to manifest-only format |
+| 1.0.14 | 2024-08-12 | [43904](https://github.com/airbytehq/airbyte/pull/43904) | Update dependencies |
+| 1.0.13 | 2024-08-10 | [43678](https://github.com/airbytehq/airbyte/pull/43678) | Update dependencies |
+| 1.0.12 | 2024-08-03 | [43192](https://github.com/airbytehq/airbyte/pull/43192) | Update dependencies |
+| 1.0.11 | 2024-07-27 | [42744](https://github.com/airbytehq/airbyte/pull/42744) | Update dependencies |
+| 1.0.10 | 2024-07-20 | [42277](https://github.com/airbytehq/airbyte/pull/42277) | Update dependencies |
+| 1.0.9 | 2024-07-13 | [41709](https://github.com/airbytehq/airbyte/pull/41709) | Update dependencies |
 | 1.0.8 | 2024-07-10 | [41494](https://github.com/airbytehq/airbyte/pull/41494) | Update dependencies |
 | 1.0.7 | 2024-07-09 | [41226](https://github.com/airbytehq/airbyte/pull/41226) | Update dependencies |
 | 1.0.6 | 2024-07-06 | [40851](https://github.com/airbytehq/airbyte/pull/40851) | Update dependencies |

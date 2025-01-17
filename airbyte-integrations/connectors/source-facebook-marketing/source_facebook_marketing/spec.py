@@ -6,13 +6,15 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import List, Literal, Optional, Set, Union
 
-from airbyte_cdk.sources.config import BaseConfig
-from airbyte_cdk.utils.oneof_option_config import OneOfOptionConfig
 from facebook_business.adobjects.ad import Ad
 from facebook_business.adobjects.adset import AdSet
 from facebook_business.adobjects.adsinsights import AdsInsights
 from facebook_business.adobjects.campaign import Campaign
 from pydantic.v1 import BaseModel, Field, PositiveInt, constr
+
+from airbyte_cdk.sources.config import BaseConfig
+from airbyte_cdk.utils.oneof_option_config import OneOfOptionConfig
+
 
 logger = logging.getLogger("airbyte")
 
@@ -199,10 +201,9 @@ class ConnectorConfig(BaseConfig):
         airbyte_secret=True,
     )
 
-    credentials: Optional[Union[OAuthCredentials, ServiceAccountCredentials]] = Field(
+    credentials: Union[OAuthCredentials, ServiceAccountCredentials] = Field(
         title="Authentication",
         description="Credentials for connecting to the Facebook Marketing API",
-        discriminator="auth_type",
         type="object",
     )
 
